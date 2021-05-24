@@ -24,7 +24,7 @@ FROM ${BASE_IMAGE}
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL /bin/bash
 ARG MAKEFLAGS=-j$(nproc)
-ARG WORKSPACE=jetson-voice
+ARG WORKSPACE=/jetson-voice
 
 WORKDIR ${WORKSPACE}
 
@@ -91,6 +91,6 @@ RUN PYTHON_ROOT=`pip3 show transformers | grep Location: | cut -d' ' -f2` && \
 ## start-up environment
 ################################################################
 ENV PYTHONIOENCODING=utf-8
-ENV PYTHONPATH=/${WORKSPACE}
+ENV PYTHONPATH=${WORKSPACE}
 
     

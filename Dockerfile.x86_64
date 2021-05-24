@@ -1,0 +1,96 @@
+# Copyright (c) 2021, NVIDIA CORPORATION. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+ARG MAKEFLAGS=-j$(nproc)
+ARG WORKSPACE=jetson-voice
+
+WORKDIR ${WORKSPACE}
+
+
+################################################################
+## PyCUDA
+################################################################
+RUN pip3 install pycuda six --verbose
+
+
+################################################################
+## ctc-decoders
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		  swig \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+RUN git clone https://github.com/dusty-nv/OpenSeq2Seq -b ctc-decoders && \
+    cd OpenSeq2Seq/decoders && \
+    ./setup.sh
+    
+RUN pip3 install git+https://github.com/NVIDIA/dllogger
+RUN pip3 install nltk
+
+
+################################################################
+## install some audio stuff
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		  alsa-base \
+            libasound2-dev \
+            alsa-utils \
+            portaudio19-dev \
+		  libsndfile1 \
+		  unzip \
+		  tzdata \
+		  nano \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+RUN pip3 install soundfile pyaudio wave
+
+
+################################################################
+## various patches to install
+################################################################
+COPY patches patches
+
+RUN PYTHON_ROOT=`pip3 show transformers | grep Location: | cut -d' ' -f2` && \
+    TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
+    echo "Python package root path:  $PYTHON_ROOT" && \
+    echo "Applying patches for transformers $TRANSFORMERS_VERSION" && \
+    cp patches/transformers/$TRANSFORMERS_VERSION/convert_graph_to_onnx.py $PYTHON_ROOT/transformers/convert_graph_to_onnx.py && \
+    cp patches/transformers/$TRANSFORMERS_VERSION/modeling_distilbert.py $PYTHON_ROOT/transformers/models/distilbert/modeling_distilbert.py && \
+    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $PYTHON_ROOT/nemo/collections/nlp/modules/common/huggingface/distilbert.py && \
+    cp patches/nemo/${NEMO_VERSION}/exportable.py $PYTHON_ROOT/nemo/core/classes/exportable.py
+
+
+################################################################
+## start-up environment
+################################################################
+ENV PYTHONIOENCODING=utf-8
+ENV PYTHONPATH=/${WORKSPACE}
+
+    

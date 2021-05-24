@@ -1,0 +1,240 @@
+# Copyright (c) 2021, NVIDIA CORPORATION. All rights reserved.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the "Software"),
+# to deal in the Software without restriction, including without limitation
+# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# and/or sell copies of the Software, and to permit persons to whom the
+# Software is furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL
+# THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+
+ARG BASE_IMAGE
+FROM ${BASE_IMAGE}
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV SHELL /bin/bash
+ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
+ARG MAKEFLAGS=-j$(nproc)
+ARG WORKSPACE=jetson-voice
+
+WORKDIR ${WORKSPACE}
+
+# alias python3 -> python
+RUN rm /usr/bin/python && \
+    ln -s /usr/bin/python3 /usr/bin/python && \
+    ln -s /usr/bin/pip3 /usr/bin/pip
+
+
+################################################################
+## tokenizers/transformers
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+            cmake \
+		  curl \
+		  pkg-config \
+		  protobuf-compiler \
+		  libprotoc-dev \
+		  nano \
+		  tzdata \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+# install sentencepiece
+RUN git clone https://github.com/google/sentencepiece && \
+	cd sentencepiece && \
+	mkdir build && \
+	cd build && \
+	cmake .. && \
+	make -j $(nproc) && \
+	make install && \
+	ldconfig -v && \
+	cd .. && \
+	cd python && \
+	python3 setup.py install --verbose && \
+	cd ../../ && \
+	rm -r -f sentencepiece
+
+# install rust (used by tokenizers)
+RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustc --version && \
+    pip3 install setuptools-rust
+
+# install tokenizers
+RUN pip3 install tokenizers --verbose
+
+# Apache arrow is needed by datasets package ('pip install pyarrow' is broken, so built from source)
+#  https://github.com/apache/arrow/blob/master/docs/source/developers/python.rst#using-pip
+#  https://raspberrypi.stackexchange.com/a/117723
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+			libjemalloc-dev \
+			libboost-dev \
+			libboost-filesystem-dev \
+			libboost-system-dev \
+			libboost-regex-dev \
+			autoconf \
+			flex \
+			bison \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean 
+
+RUN git clone --branch apache-arrow-3.0.0 https://github.com/apache/arrow.git && \
+	cd arrow/cpp && \
+	mkdir build && \
+	cd build && \
+	export ARROW_HOME=/usr/local && \
+	cmake \
+		-DCMAKE_INSTALL_PREFIX=$ARROW_HOME \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DARROW_WITH_BZ2=ON \
+		-DARROW_WITH_ZLIB=ON \
+		-DARROW_WITH_ZSTD=ON \
+		-DARROW_WITH_LZ4=ON \
+		-DARROW_WITH_SNAPPY=ON \
+		-DARROW_PARQUET=ON \
+		-DARROW_CUDA=ON \
+		-DARROW_PYTHON=ON \
+		-DARROW_BUILD_TESTS=OFF \
+		.. && \
+	make -j$(nproc) && \
+	make install && \
+	cd ../../python && \
+	python3 setup.py build_ext --build-type=release --with-parquet --with-cuda --verbose && \
+	python3 setup.py install --verbose && \
+	cd ../../ && \
+	rm -r -f arrow
+
+RUN pip3 show pyarrow && \
+	python3 -c "import pyarrow" && \
+	python3 -c "from pyarrow import cuda"
+	
+# install huggingface (locked to 4.5.1, which the patches are based on)
+# datasets package is needed to run the huggingface examples
+RUN pip3 install transformers==4.5.1 datasets --verbose
+  
+
+################################################################
+## onnx / onnxruntime / onnx-graphsurgeon
+################################################################
+ARG ONNXRUNTIME_URL=https://nvidia.box.com/shared/static/ukszbm1iklzymrt54mgxbzjfzunq7i9t.whl
+ARG ONNXRUNTIME_WHL=onnxruntime_gpu-1.7.0-cp36-cp36m-linux_aarch64.whl
+
+RUN wget --quiet --show-progress --progress=bar:force:noscroll --no-check-certificate ${ONNXRUNTIME_URL} -O ${ONNXRUNTIME_WHL} && \
+    pip3 install ${ONNXRUNTIME_WHL} --verbose && \
+    pip3 install onnx psutil sympy --verbose && \
+    rm ${ONNXRUNTIME_WHL}
+
+# install onnx-graphsurgeon
+RUN cd /opt && \
+    git clone --recursive https://github.com/nvidia/tensorrt tensorrt && \
+    cd tensorrt/tools/onnx-graphsurgeon && \
+    python3 setup.py install --verbose && \
+    cd ../../../ && \
+    rm -r -f tensorrt
+    
+    
+################################################################
+## NeMo
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		  libopencc-dev \
+		  python3-tk \
+		  libmecab-dev \
+		  mecab \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+RUN cd /opt && \
+    git clone --recursive --branch v0.8.1 https://github.com/pytorch/text torchtext && \
+    cd torchtext && \
+    python3 setup.py clean install 
+    
+RUN pip3 show torch torchvision torchaudio torchtext
+
+# clone/build nemo
+ARG NEMO_VERSION
+RUN cd /opt && git clone --recursive --branch v${NEMO_VERSION} https://github.com/nvidia/nemo
+COPY patches/nemo/${NEMO_VERSION}/setup.py /opt/nemo/setup.py
+
+RUN pip3 install -r /opt/nemo/requirements/requirements.txt --verbose
+RUN pip3 install -r /opt/nemo/requirements/requirements_asr.txt --verbose
+RUN pip3 install -r /opt/nemo/requirements/requirements_nlp.txt --verbose
+RUN pip3 install -r /opt/nemo/requirements/requirements_tts.txt --verbose
+#RUN pip3 install omegaconf==2.1.0dev24 --verbose
+
+RUN cd /opt/nemo && python3 setup.py install --verbose
+
+
+################################################################
+## ctc-decoders
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		  swig \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+RUN git clone https://github.com/dusty-nv/OpenSeq2Seq -b ctc-decoders && \
+    cd OpenSeq2Seq/decoders && \
+    ./setup.sh
+    
+RUN pip3 install git+https://github.com/NVIDIA/dllogger
+RUN pip3 install nltk
+
+
+################################################################
+## install some audio stuff
+################################################################
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+		  alsa-base \
+            libasound2-dev \
+            alsa-utils \
+            portaudio19-dev \
+		  libsndfile1 \
+		  unzip \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+    
+RUN pip3 install soundfile pyaudio wave
+
+
+################################################################
+## various patches to install
+################################################################
+COPY patches patches
+
+RUN PYTHON_ROOT=`pip3 show torch | grep Location: | cut -d' ' -f2` && \
+    PYTORCH_VERSION=`pip3 show torch | grep Version: | cut -d' ' -f2` && \
+    TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
+    echo "Python package root path:  $PYTHON_ROOT" && \
+    echo "Applying patches for PyTorch $PYTORCH_VERSION" && \
+    echo "Applying patches for transformers $TRANSFORMERS_VERSION" && \
+    cp patches/pytorch/$PYTORCH_VERSION/functional.py ${PYTHON_PATH}/torch/functional.py && \
+    cp patches/transformers/$TRANSFORMERS_VERSION/convert_graph_to_onnx.py $PYTHON_ROOT/transformers/convert_graph_to_onnx.py && \
+    cp patches/transformers/$TRANSFORMERS_VERSION/modeling_distilbert.py $PYTHON_ROOT/transformers/models/distilbert/modeling_distilbert.py && \
+    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $PYTHON_ROOT/nemo/collections/nlp/modules/common/huggingface/distilbert.py && \
+    cp patches/nemo/${NEMO_VERSION}/exportable.py $PYTHON_ROOT/nemo/core/classes/exportable.py
+
+
+################################################################
+## start-up environment
+################################################################
+ENV PYTHONIOENCODING=utf-8
+ENV PYTHONPATH=/${WORKSPACE}
+
+# disable JupyterLab from auto-starting (inherited behavior from l4t-ml)
+CMD /bin/bash

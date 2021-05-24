@@ -1,0 +1,19 @@
+4a5,7
+> import librosa  # STFT patch for aarch64
+> import numpy as np
+> 
+515,516c518,528
+<     return _VF.stft(input, n_fft, hop_length, win_length, window,  # type: ignore
+<                     normalized, onesided, return_complex)
+---
+>         
+>     # STFT patch for aarch64
+>     # https://stackoverflow.com/a/66872148
+>     librosa_stft = librosa.stft(input.cpu().detach().numpy().reshape(-1), n_fft, hop_length, win_length, window="hann", center=center, pad_mode=pad_mode)
+>     librosa_stft = np.array([[a.real, a.imag] for a in librosa_stft])
+>     librosa_stft = np.transpose(librosa_stft, axes=[0, 2, 1])
+>     librosa_stft = np.expand_dims(librosa_stft, 0)
+>     librosa_stft = torch.from_numpy(librosa_stft)
+>     return librosa_stft
+>     #return _VF.stft(input, n_fft, hop_length, win_length, window,  # type: ignore
+>     #                normalized, onesided, return_complex)

@@ -1,0 +1,30 @@
+17a18
+> from typing import Dict, Optional
+19a21
+> from nemo.core.neural_types import ChannelType, MaskType, NeuralType
+29a32,53
+>     @property
+>     def input_types(self) -> Optional[Dict[str, NeuralType]]:
+>         """
+>         These are ordered incorrectly in bert_module.py WRT to QAModel.forward()
+>         DistilBert doesn't use token_type_ids, but the QAModel still needs them during export.
+>         By re-ordring them, the correct input_names are used during export of the ONNX model.
+>         """
+>         return {
+>             "input_ids": NeuralType(('B', 'T'), ChannelType()),
+>             "token_type_ids": NeuralType(('B', 'T'), ChannelType(), optional=True),
+>             "attention_mask": NeuralType(('B', 'T'), MaskType(), optional=True)
+>         }
+> 
+>     '''
+>     # note:  disabling the token_type_ids here still leads to incorrect names, because QAModel.forward()
+>     #        still needs the token_type_ids to run the trace, and hence the input_example is still larger
+>     @property
+>     def disabled_deployment_input_names(self):
+>         """Implement this method to return a set of input names disabled for export"""
+>         return ['token_type_ids']
+>     '''
+>     
+34a59
+>         
+\ No newline at end of file

@@ -1,0 +1,50 @@
+14a15,17
+> import os 
+> import json
+> 
+83a87,91
+>             "--save-config",
+>             action="store_true",
+>             help="Save the model configuration along with the ONNX",
+>         )
+>         self.add_argument(
+280a289,295
+>         print('Exporting from PyTorch to ONNX...')
+>         print('input_names', input_names)
+>         print('output_names', output_names)
+>         print('dynamic_axes', dynamic_axes)
+>         print('tokens', tokens)
+>         print('model_args', model_args)
+>         
+291a307
+>             verbose=True
+339a356
+>     save_config: bool = False,
+366,367c383,384
+<     elif len(listdir(output.parent.as_posix())) > 0:
+<         raise Exception(f"Folder {output.parent.as_posix()} is not empty, aborting conversion")
+---
+>     #elif len(listdir(output.parent.as_posix())) > 0:
+>     #    raise Exception(f"Folder {output.parent.as_posix()} is not empty, aborting conversion")
+374c391,407
+< 
+---
+>         
+>     # Save the configuration
+>     if save_config:
+>         config_path = os.path.splitext(output)[0] + '.json'
+> 
+>         config = dict(
+>             model = nlp.model.config.to_dict(),
+>             tokenizer = nlp.tokenizer.init_kwargs
+>         )
+>         
+>         #nlp.model.config.to_json_file(config_path)
+>         
+>         with open(config_path, 'w') as config_file:
+>             json.dump(config, config_file, indent=2)
+>             
+>         print(f"Saved config to {config_path}")
+>         
+468a502
+>             args.save_config

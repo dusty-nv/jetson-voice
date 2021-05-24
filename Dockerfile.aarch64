@@ -25,7 +25,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL /bin/bash
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 ARG MAKEFLAGS=-j$(nproc)
-ARG WORKSPACE=jetson-voice
+ARG WORKSPACE=/jetson-voice
 
 WORKDIR ${WORKSPACE}
 
@@ -220,21 +220,22 @@ COPY patches patches
 RUN PYTHON_ROOT=`pip3 show torch | grep Location: | cut -d' ' -f2` && \
     PYTORCH_VERSION=`pip3 show torch | grep Version: | cut -d' ' -f2` && \
     TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
+    NEMO_PATH="$PYTHON_ROOT/nemo_toolkit-${NEMO_VERSION}-py3.6.egg/nemo" && \
     echo "Python package root path:  $PYTHON_ROOT" && \
     echo "Applying patches for PyTorch $PYTORCH_VERSION" && \
     echo "Applying patches for transformers $TRANSFORMERS_VERSION" && \
-    cp patches/pytorch/$PYTORCH_VERSION/functional.py ${PYTHON_PATH}/torch/functional.py && \
+    cp patches/pytorch/$PYTORCH_VERSION/functional.py $PYTHON_ROOT/torch/functional.py && \
     cp patches/transformers/$TRANSFORMERS_VERSION/convert_graph_to_onnx.py $PYTHON_ROOT/transformers/convert_graph_to_onnx.py && \
     cp patches/transformers/$TRANSFORMERS_VERSION/modeling_distilbert.py $PYTHON_ROOT/transformers/models/distilbert/modeling_distilbert.py && \
-    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $PYTHON_ROOT/nemo/collections/nlp/modules/common/huggingface/distilbert.py && \
-    cp patches/nemo/${NEMO_VERSION}/exportable.py $PYTHON_ROOT/nemo/core/classes/exportable.py
+    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $NEMO_PATH/collections/nlp/modules/common/huggingface/distilbert.py && \
+    cp patches/nemo/${NEMO_VERSION}/exportable.py $NEMO_PATH/core/classes/exportable.py
 
 
 ################################################################
 ## start-up environment
 ################################################################
 ENV PYTHONIOENCODING=utf-8
-ENV PYTHONPATH=/${WORKSPACE}
+ENV PYTHONPATH=${WORKSPACE}
 
 # disable JupyterLab from auto-starting (inherited behavior from l4t-ml)
 CMD /bin/bash

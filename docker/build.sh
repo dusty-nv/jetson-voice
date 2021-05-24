@@ -25,7 +25,7 @@ if [ $ARCH = "aarch64" ]; then
 		fi
 	fi
 elif [ $ARCH = "x86_64" ]; then
-	BASE_IMAGE:="nvcr.io/nvidia/nemo:$NEMO_VERSION"
+	BASE_IMAGE=${BASE_IMAGE:-"nvcr.io/nvidia/nemo:$NEMO_VERSION"}
 fi
 
 echo "BASE_IMAGE=$BASE_IMAGE"

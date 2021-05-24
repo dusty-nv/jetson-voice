@@ -23,7 +23,6 @@ FROM ${BASE_IMAGE}
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV SHELL /bin/bash
-ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 ARG MAKEFLAGS=-j$(nproc)
 ARG WORKSPACE=jetson-voice
 
@@ -77,6 +76,7 @@ RUN pip3 install soundfile pyaudio wave
 ################################################################
 COPY patches patches
 
+ARG NEMO_VERSION
 RUN PYTHON_ROOT=`pip3 show transformers | grep Location: | cut -d' ' -f2` && \
     TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
     echo "Python package root path:  $PYTHON_ROOT" && \

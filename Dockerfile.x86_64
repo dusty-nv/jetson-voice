@@ -53,6 +53,17 @@ RUN pip3 install nltk
 
 
 ################################################################
+## Jarvis GRPC
+################################################################
+ARG JARVIS_URL=https://nvidia.box.com/shared/static/on9t7zqes2s6er1wpumidnc6rphwsyy7.whl
+ARG JARVIS_WHL=jarvis_api-1.0.0b1-py3-none-any.whl
+
+RUN wget --quiet --show-progress --progress=bar:force:noscroll --no-check-certificate ${JARVIS_URL} -O ${JARVIS_WHL} && \
+    pip3 install ${JARVIS_WHL} --verbose && \
+    rm ${JARVIS_WHL}
+    
+    
+################################################################
 ## install some audio stuff
 ################################################################
 RUN apt-get update && \

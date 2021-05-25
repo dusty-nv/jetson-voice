@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
+import os
 import json
 import pprint
 import logging
@@ -21,7 +22,7 @@ import argparse
 #
 # It's recommended to use one of the methods above instead of changing _default_config directly.
 #
-_default_config = {
+_default_global_config = {
     'version' : 0.1,
     'model_dir' : 'data/networks',
     'default_backend' : 'tensorrt',
@@ -30,6 +31,25 @@ _default_config = {
     'profile' : False
 }
 
+
+def find_resource(path):
+    """
+    Find a resource by checking some common paths.
+    TODO move this to another file.
+    """
+    if os.path.exists(path):
+        return path
+        
+    search_dirs = [global_config.model_dir]
+    
+    for search_dir in search_dirs:
+        search_path = os.path.join(search_dir, path)
+        
+        if os.path.exists(search_path):
+            return search_path
+    
+    raise IOError(f"failed to locate resource '{path}'")
+    
 
 class ConfigDict(dict):
     """
@@ -69,6 +89,8 @@ class ConfigDict(dict):
         """
         Load from JSON file.
         """
+        path = find_resource(path)
+        
         if clear:
             self.clear()
             
@@ -131,7 +153,7 @@ class ConfigDict(dict):
 #
 logging.basicConfig(format='%(asctime)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO) 
 
-config = None
+global_config = None
 
 def _set_log_level(key, value):
     log_value = value.upper()
@@ -147,18 +169,18 @@ def _set_log_level(key, value):
     logging.getLogger().setLevel(log_level)
     logging.debug(f'set logging level to {value}')
 
-    if config is not None and value.upper() == 'DEBUG':
-        config['debug'] = True
+    if global_config is not None and value.upper() == 'DEBUG':
+        global_config['debug'] = True
     
 #
 # global config definition
 #
-config = ConfigDict(_default_config, watch={'log_level':_set_log_level})
+global_config = ConfigDict(_default_global_config, watch={'log_level':_set_log_level})
 
-if config.log_level.upper() == 'DEBUG':
-    config['debug'] = True
+if global_config.log_level.upper() == 'DEBUG':
+    global_config['debug'] = True
     
-logging.debug(f'global config:\n{config}')
+logging.debug(f'global config:\n{global_config}')
 
 
 #
@@ -171,7 +193,7 @@ class ConfigArgParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
         super(ConfigArgParser, self).__init__(*args, **kwargs)
     
-        self.add_argument('--model-dir', default=_default_config['model_dir'], help=f"sets the root path of the models (default '{_default_config['model_dir']}')")
+        self.add_argument('--model-dir', default=_default_global_config['model_dir'], help=f"sets the root path of the models (default '{_default_global_config['model_dir']}')")
         self.add_argument('--global-config', default=None, type=str, help='path to JSON file to load global configuration from')
         self.add_argument('--profile', action='store_true', help='enables model performance profiling')
         self.add_argument('--verbose', action='store_true', help='sets the logging level to verbose')
@@ -179,27 +201,27 @@ class ConfigArgParser(argparse.ArgumentParser):
         
         log_levels = ['debug', 'verbose', 'info', 'warning', 'error', 'critical']
         
-        self.add_argument('--log-level', default=_default_config['log_level'], type=str, choices=log_levels,
-                          help=f"sets the logging level to one of the options above (default={_default_config['log_level']})")
+        self.add_argument('--log-level', default=_default_global_config['log_level'], type=str, choices=log_levels,
+                          help=f"sets the logging level to one of the options above (default={_default_global_config['log_level']})")
         
     def parse_args(self, *args, **kwargs):
         args = super(ConfigArgParser, self).parse_args(*args, **kwargs)
         
-        config.model_dir = args.model_dir
-        config.log_level = args.log_level
+        global_config.model_dir = args.model_dir
+        global_config.log_level = args.log_level
         
         if args.profile:
-            config.profile = True
+            global_config.profile = True
             
         if args.verbose:
-            config.log_level = 'verbose'
+            global_config.log_level = 'verbose'
             
         if args.debug:
-            config.log_level = 'debug'
+            global_config.log_level = 'debug'
         
         if args.global_config:
-            config.load(args.global_config)
+            global_config.load(args.global_config)
             
-        logging.debug(f'global config:\n{config}')    
+        logging.debug(f'global config:\n{global_config}')    
         return args
 

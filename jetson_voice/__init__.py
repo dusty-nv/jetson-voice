@@ -2,9 +2,10 @@
 # coding: utf-8
 
 from .utils import (
-    config, ConfigDict, ConfigArgParser
+    find_resource, global_config, ConfigDict, ConfigArgParser,
+    list_audio_devices, list_audio_inputs, list_audio_outputs, AudioStream, 
 )
 
-from .asr import ASR
+from .asr import ASR, ASRService
 
-__version__ = config.version
+__version__ = global_config.version

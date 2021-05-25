@@ -33,8 +33,13 @@ def audio_to_int16(samples):
     """
     Convert audio samples to 16-bit float in the range [-32767,32767]
     """
-    return (samples * 32768).astype(np.int16)
-    
+    if samples.dtype == np.int16:
+        return samples
+    elif samples.dtype == np.float32:
+        return (samples * 32768).astype(np.int16)
+    else:
+        return samples.astype(np.int16)
+        
     
 def AudioStream(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
     """
@@ -53,6 +58,8 @@ def AudioStream(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
         return AudioMicStream(mic, sample_rate=sample_rate, chunk_size=chunk_size)
     elif wav is not None and wav != '':
         return AudioWavStream(wav, sample_rate=sample_rate, chunk_size=chunk_size)
+    else:
+        raise ValueError('either wav or mic argument must be specified')
  
  
 class AudioMicStream:
@@ -176,4 +183,77 @@ class AudioWavStream:
     def __iter__(self):
         self.open()
         return self
+
+
+#
+# device enumeration
+# 
+_audio_device_info = None
+
+def _get_audio_devices():
+    global _audio_device_info
+    
+    if _audio_device_info:
+        return _audio_device_info
         
+    p = pa.PyAudio()
+    info = p.get_host_api_info_by_index(0)
+    numDevices = info.get('deviceCount')
+    
+    _audio_device_info = []
+    
+    for i in range(0, numDevices):
+        _audio_device_info.append(p.get_device_info_by_host_api_device_index(0, i))
+    
+    p.terminate()
+    return _audio_device_info
+    
+    
+def list_audio_inputs():
+    """
+    Print out information about present audio input devices.
+    """
+    devices = _get_audio_devices()
+
+    print('')
+    print('----------------------------------------------------')
+    print(f" Audio Input Devices")
+    print('----------------------------------------------------')
+        
+    for i, dev_info in enumerate(devices):    
+        if (dev_info.get('maxInputChannels')) > 0:
+            print("Input Device ID {:d} - {:s} (inputs={:.0f}) (sample_rate={:.0f})".format(i,
+                  dev_info.get('name'), dev_info.get('maxInputChannels'), dev_info.get('defaultSampleRate')))
+                 
+    print('')
+    
+    
+def list_audio_outputs():
+    """
+    Print out information about present audio output devices.
+    """
+    devices = _get_audio_devices()
+    
+    print('')
+    print('----------------------------------------------------')
+    print(f" Audio Output Devices")
+    print('----------------------------------------------------')
+        
+    for i, dev_info in enumerate(devices):  
+        if (dev_info.get('maxOutputChannels')) > 0:
+            print("Output Device ID {:d} - {:s} (outputs={:.0f}) (sample_rate={:.0f})".format(i,
+                  dev_info.get('name'), dev_info.get('maxOutputChannels'), dev_info.get('defaultSampleRate')))
+                  
+    print('')
+    
+    
+def list_audio_devices():
+    """
+    Print out information about present audio input and output devices.
+    """
+    list_audio_inputs()
+    list_audio_outputs()
+
+              
+
+              

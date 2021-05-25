@@ -141,3 +141,6 @@ if __name__ == "__main__":
                 
                 if transcript['end']:
                     print('')
+                    
+    print('\naudio stream closed.')
+    

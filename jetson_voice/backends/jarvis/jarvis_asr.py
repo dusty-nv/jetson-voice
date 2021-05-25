@@ -3,6 +3,8 @@
 
 import os
 import grpc
+import queue
+import threading
 import logging
 
 import jarvis_api.audio_pb2 as ja
@@ -15,17 +17,26 @@ from jetson_voice.utils import audio_to_int16
     
 class JarvisASRService(ASRService):
     """
-    Jarvis streaming ASR.
+    Jarvis streaming ASR service.  
     """
     def __init__(self, config, *args, **kwargs):
+        """
+        Open a streaming channel to the Jarvis server for ASR.  This establishes a connection over GRPC 
+        and sends/recieves the requests and responses asynchronously.  Incoming audio samples get put
+        into a request queue that GRPC picks up, and a thread waits on responses to come in.
+        """
         super(JarvisASRService, self).__init__(config, *args, **kwargs)
         
         self.config.setdefault('server', 'localhost:50051')
         self.config.setdefault('sample_rate', 16000)
         self.config.setdefault('frame_length', 1.0)
+        self.config.setdefault('request_timeout', 2.0)      # how long to wait for new audio to come in
+        self.config.setdefault('response_timeout', 0.05)    # how long to wait for results from jarvis
         self.config.setdefault('language_code', 'en-US')
-        self.config.setdefault('top_k', 1)
         self.config.setdefault('enable_automatic_punctuation', True)
+        self.config.setdefault('top_k', 1)
+
+        logging.info(f'Jarvis ASR service config:\n{self.config}')
         
         self.channel = grpc.insecure_channel(self.config.server)
         self.client = jasr_srv.JarvisASRStub(self.channel)
@@ -35,17 +46,24 @@ class JarvisASRService(ASRService):
             sample_rate_hertz = self.config.sample_rate,
             language_code = self.config.language_code,
             max_alternatives = self.config.top_k,
+            enable_word_time_offsets = True,
             enable_automatic_punctuation = self.config.enable_automatic_punctuation
         )
-        
-        print('recognition config', self.recognition_config)
-        
+
         self.streaming_config = jasr.StreamingRecognitionConfig(
             config = self.recognition_config,
             interim_results = True
         )
         
+        self.request_queue = queue.Queue()
+        self.request_queue.put(jasr.StreamingRecognizeRequest(streaming_config=self.streaming_config))
+         
+        self.responses = self.client.StreamingRecognize(self)
+        self.responses_queue = queue.Queue()
         
+        self.response_thread = threading.Thread(target=self.recieve_responses)
+        self.response_thread.start()
+
     def __call__(self, samples):
         """
         Transcribe streaming audio samples to text, returning the running phrase.
@@ -65,14 +83,54 @@ class JarvisASRService(ASRService):
         returned if one just ended and another is beginning. 
         """
         samples = audio_to_int16(samples)
-        print('samples', samples.shape)
+
+        self.request_queue.put(jasr.StreamingRecognizeRequest(audio_content=samples.tobytes()))
         
-        request = jasr.StreamingRecognizeRequest(audio_content=samples.tobytes())
-        responses = self.client.StreamingRecognize(iter([request]))
+        transcripts = []
         
-        print(responses)
-        return responses
+        while True:
+            try:
+                transcripts.append(self.responses_queue.get(block=True, timeout=self.config.response_timeout))
+            except queue.Empty:
+                break
+
+        return transcripts
+ 
+    def __next__(self):
+        """
+        Retrieve the next request containing audio samples to send to the Jarvis server.
+        This is implemented using an iterator interface as that is what GRPC expects.
+        """
+        try:
+            request = self.request_queue.get(block=True, timeout=self.config.request_timeout)
+            return request
+        except queue.Empty:
+            logging.debug(f'{self.config.request_timeout} second timeout occurred waiting for audio samples, stopping Jarvis ASR service')
+            raise StopIteration
         
+    def recieve_responses(self):
+        """
+        Wait to recieve responses from the Jarvis server and parse them.
+        """
+        logging.debug('starting Jarvis ASR service response reciever thread')
+        
+        for response in self.responses:  # this is blocking
+            if not response.results:
+                continue
+
+            result = response.results[0]
+
+            if not result.alternatives:
+                continue
+            
+            #print(result.alternatives[0].transcript)
+
+            self.responses_queue.put({
+                'text' : result.alternatives[0].transcript,
+                'end' : result.is_final
+            })
+
+        logging.debug('exiting Jarvis ASR service response reciever thread')
         
     @property
     def sample_rate(self):
@@ -95,3 +153,4 @@ class JarvisASRService(ASRService):
         Number of samples per frame/chunk (equal to frame_length * sample_rate)
         """
         return int(self.frame_length * self.sample_rate)
+

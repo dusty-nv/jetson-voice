@@ -151,7 +151,7 @@ class ConfigDict(dict):
 #
 # logging handlers
 #
-logging.basicConfig(format='%(asctime)s - %(message)s', datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO) 
+logging.basicConfig(format='[%(asctime)s] %(filename)s:%(lineno)d - %(message)s', datefmt="%Y-%m-%d %H:%M:%S", level=logging.INFO) 
 
 global_config = None
 

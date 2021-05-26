@@ -4,12 +4,13 @@
 import os
 import logging
 
-from jetson_voice.utils import global_config, ConfigDict, ConfigArgParser
+from jetson_voice.utils import global_config, ConfigDict
 
 
 def ASR(resource, *args, **kwargs):
     """
-    Loads a streaming ASR service
+    Loads a streaming ASR service or model.
+    See the ASRService class for the signature that implementations use.
     """
     if isinstance(resource, str):
         root, ext = os.path.splitext(resource)
@@ -103,7 +104,7 @@ class ASRService():
         
 if __name__ == "__main__":
 
-    from jetson_voice import list_audio_devices, AudioStream
+    from jetson_voice import list_audio_devices, AudioStream, ConfigArgParser
     
     parser = ConfigArgParser()
     

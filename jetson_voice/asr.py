@@ -4,13 +4,22 @@
 import os
 import logging
 
-from jetson_voice.utils import global_config, ConfigDict
+from jetson_voice.utils import load_resource
 
 
 def ASR(resource, *args, **kwargs):
     """
     Loads a streaming ASR service or model.
     See the ASRService class for the signature that implementations use.
+    """
+    factory_map = {
+        'jarvis' : 'jetson_voice.backends.jarvis.JarvisASRService',
+        'tensorrt' : 'jetson_voice.models.ASRModel',
+        'onnxruntime' : 'jetson_voice.models.ASRModel'
+    }
+    
+    return load_resource(resource, factory_map, *args, **kwargs)
+    
     """
     if isinstance(resource, str):
         root, ext = os.path.splitext(resource)
@@ -39,9 +48,12 @@ def ASR(resource, *args, **kwargs):
     if config.backend == 'jarvis':
         from jetson_voice.backends.jarvis import JarvisASRService
         return JarvisASRService(config, *args, **kwargs)
+    elif config.backend == 'tensorrt' or config.backend == 'onnxruntime':
+        from jetson_voice.models import ASRModel
+        return ASRModel(config, *args, **kwargs)
     else:
         raise ValueError(f"invalid backend '{config.backend}' (valid options are: tensorrt, onnxruntime, jarvis)")
-    
+    """
     
 class ASRService():
     """

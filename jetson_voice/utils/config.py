@@ -32,25 +32,6 @@ _default_global_config = {
 }
 
 
-def find_resource(path):
-    """
-    Find a resource by checking some common paths.
-    TODO move this to another file.
-    """
-    if os.path.exists(path):
-        return path
-        
-    search_dirs = [global_config.model_dir]
-    
-    for search_dir in search_dirs:
-        search_path = os.path.join(search_dir, path)
-        
-        if os.path.exists(search_path):
-            return search_path
-    
-    raise IOError(f"failed to locate resource '{path}'")
-    
-
 class ConfigDict(dict):
     """
     Configuration dict that can be loaded from JSON and has members
@@ -89,6 +70,7 @@ class ConfigDict(dict):
         """
         Load from JSON file.
         """
+        from .resource import find_resource  # import here to avoid circular dependency
         path = find_resource(path)
         
         if clear:

@@ -13,15 +13,15 @@ import tensorrt as trt
 import pycuda.driver as cuda
 import pycuda.autoinit
 
-from trt_builder import build_engine, TRT_LOGGER
-from trt_binding import Binding
+from .trt_builder import build_engine, TRT_LOGGER
+from .trt_binding import Binding
 
 
 class TRTModel:
     """
     Base class for TensorRT models.
     """
-    def __init__(self, config, dynamic_shapes=None):
+    def __init__(self, config, dynamic_shapes=None, *args, **kwargs):
         """
         Load a TensorRT model from ONNX or serialized TensorRT engine.
         
@@ -44,7 +44,7 @@ class TRTModel:
                 
         # either build or load TensorRT engine
         if model_ext == '.onnx':
-            self.trt_engine = build_engine(self.config, dynamic_shapes)
+            self.trt_engine = build_engine(self.config, dynamic_shapes=dynamic_shapes)
         elif model_ext == '.engine' or model_ext == '.plan':
             with open(self.config.model_path, 'rb') as f:
                 self.trt_runtime = trt.Runtime(TRT_LOGGER)
@@ -56,7 +56,7 @@ class TRTModel:
             raise IOError(f'failed to load TensorRT engine from {self.model_path}')
                 
         self.trt_context = self.trt_engine.create_execution_context()
-        logging.info(f'loaded TensorRT engine from {self.model_path}')
+        logging.info(f'loaded TensorRT engine from {self.config.model_path}')
 
         # create a stream in which to copy inputs/outputs and run inference
         self.stream = cuda.Stream()

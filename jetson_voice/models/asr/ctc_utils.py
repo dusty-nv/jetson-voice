@@ -191,7 +191,7 @@ def find_silent_intervals(logits, blank_symbol_id, min_silent_time, time_offset)
             if last_interval_start is None:
                 last_interval_start = i 
         
-        if last_interval_start is not None and (argmax != blank_symbol or (i == num_timesteps-1)):
+        if last_interval_start is not None and (argmax != blank_symbol_id or (i == num_timesteps-1)):
             if i - last_interval_start >= min_silent_time:
                 silent_intervals.append((last_interval_start + time_offset, i-1+time_offset))
             #    print(f'     new silent interval ({last_interval_start + self.timestep}:{i-1+self.timestep}) {i - last_interval_start} > {min_length:.2f}')  

@@ -57,11 +57,11 @@ def build_engine(config,
         raise NotImplementedError('int8 support not yet implemented')
         
     # load the model (from ONNX)
-    logging.info(f'loading {model}')
+    logging.info(f'loading {config.model_path}')
     
-    with open(model, 'rb') as model_file:
+    with open(config.model_path, 'rb') as model_file:
         if not parser.parse(model_file.read()):
-            logging.error(f'failed to parse ONNX model {model}')
+            logging.error(f'failed to parse ONNX model {config.model_path}')
             for error in range(parser.num_errors): 
                 print (parser.get_error(error))
             return None 
@@ -104,13 +104,11 @@ def build_engine(config,
     else:
         raise NotImplementedError(f"model type '{model_type}' is unrecognized or not supported")
     """           
-    if opt_shape is None:
-        opt_shape = max_shape
-
+    
     # TODO support different shape profiles for different input tensors
     if dynamic_shapes is not None:
         # NLP BERT models (and BERT derivatives) have myelin problem with dynamic shapes on aarch64
-        if any(self.config.type.lower() == x for x in ['qa', 'intent_slot', 'text_classification', 'token_classification']): 
+        if any(config.type.lower() == x for x in ['qa', 'intent_slot', 'text_classification', 'token_classification']): 
             logging.debug('disabling dynamic shapes for NLP models')
             dynamic_shapes['min'] = dynamic_shapes['max']
             dynamic_shapes['opt'] = dynamic_shapes['max']
@@ -122,7 +120,7 @@ def build_engine(config,
             dynamic_shapes['opt'] = dynamic_shapes['max']
             
         for i in range(network.num_inputs):  # TODO confirm that input is in fact dynamic
-            profile.set_shape(network.get_input(i).name, min=min_shape, opt=opt_shape, max=max_shape)
+            profile.set_shape(network.get_input(i).name, min=dynamic_shapes['min'], opt=dynamic_shapes['opt'], max=dynamic_shapes['max'])
 
         builder_config.add_optimization_profile(profile)
                     
@@ -134,7 +132,7 @@ def build_engine(config,
         print(f'  - model     {config.model_path}')
         print(f'  - config    {config.path}')
         print(f'  - output    {output}')
-        print(f'  - type      {model_type}')
+        print(f'  - type      {config.type}')
         print(f'  - layers    {network.num_layers}')
         print(f'  - inputs    {network.num_inputs}')
         print(f'  - outputs   {network.num_outputs}')

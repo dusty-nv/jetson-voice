@@ -71,7 +71,9 @@ class ConfigDict(dict):
         Load from JSON file.
         """
         from .resource import find_resource  # import here to avoid circular dependency
+        
         path = find_resource(path)
+        self.__dict__['path'] = path
         
         if clear:
             self.clear()

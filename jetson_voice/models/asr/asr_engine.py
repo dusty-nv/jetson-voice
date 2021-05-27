@@ -11,7 +11,7 @@ import importlib
 import torch
 import numpy as np
 
-from ctc import CTCDecoder
+from .ctc_decoder import CTCDecoder
 
 from jetson_voice.asr import ASRService
 from jetson_voice.utils import audio_to_float, global_config, load_model, softmax
@@ -30,7 +30,7 @@ class ASREngine(ASRService):
           model (string) -- path to ONNX model or serialized TensorRT engine/plan
           config (string) -- path to model configuration json (will be inferred from model path if empty)
         """
-        super(ASRModel, self).__init__(config, *args, **kwargs)
+        super(ASREngine, self).__init__(config, *args, **kwargs)
 
         if self.config.type != 'asr' and self.config.type != 'asr_classification':
             raise ValueError(f"{model} isn't an ASR model (type '{self.type}'")
@@ -118,7 +118,7 @@ class ASREngine(ASRService):
         self.model = load_model(self.config, dynamic_shapes)
         
         # create CTC decoder
-        if not self.classifier:
+        if not self.classification:
             self.ctc_decoder = CTCDecoder.from_config(self.config['ctc_decoder'],
                                                       self.config['decoder']['vocabulary'],
                                                       os.path.dirname(self.config.model_path))
@@ -179,7 +179,7 @@ class ASREngine(ASRService):
         self.n_timesteps_frame = int(self.frame_length / self.timestep_duration)
         self.n_timesteps_overlap = int(self.frame_overlap / self.timestep_duration)
 
-        if self.classifier:
+        if self.classification:
             argmax = np.argmax(logits)
             prob = logits[argmax]
             return (self.config['labels'][argmax], prob)
@@ -194,7 +194,7 @@ class ASREngine(ASRService):
             return transcripts
 
     @property
-    def classifier(self):
+    def classification(self):
         """
         Returns true if this is an ASR classification model.
         """
@@ -206,7 +206,7 @@ class ASREngine(ASRService):
         The sample rate that the model runs at.
         Input audio should be resampled to this rate.
         """
-        return self.config['sample_rate'] if self.classifier else self.config['preprocessor']['sample_rate']
+        return self.config['sample_rate'] if self.classification else self.config['preprocessor']['sample_rate']
         
     @property
     def frame_length(self):

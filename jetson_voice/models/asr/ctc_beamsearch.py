@@ -2,9 +2,10 @@
 # coding: utf-8
 
 import os
+import logging
 
-from ctc_decoder import CTCDecoder
-from ctc_utils import find_silent_intervals, merge_words, transcript_from_words
+from .ctc_decoder import CTCDecoder
+from .ctc_utils import find_silent_intervals, merge_words, rebase_word_times, split_words, transcript_from_words
 
 from ctc_decoders import Scorer
 from swig_decoders import BeamDecoder, ctc_beam_search_decoder_ex
@@ -47,7 +48,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
                 if not os.path.isfile(self.language_model):
                     raise IOError(f"language model file '{self.language_model}' does not exist")
                     
-        logging.info('CTCBeamSearchDecoder')
+        logging.info('creating CTCBeamSearchDecoder')
         logging.info(str(self.config))
         
         # create scorer
@@ -111,7 +112,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
         
         # split the words at EOS intervals
         if len(silent_intervals) > 0:
-            wordlists = self.split_words(silent_intervals, self.words) #self.split_vad_eos(self.words)
+            wordlists = split_words(self.words, silent_intervals)
             transcripts = []
             
             for idx, wordlist in enumerate(wordlists):
@@ -124,7 +125,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
                 end = (len(wordlists) == 1) or (idx < (len(wordlists) - 1))
                 
                 if end:
-                    wordlist = self.rebase_word_times(wordlist)
+                    wordlist = rebase_word_times(wordlist)
                     self.reset()            # TODO reset timesteps counter correctly
                 else:
                     self.words = wordlist   
@@ -134,7 +135,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
             transcripts = [(self.words, False)]
 
         return [{
-            'text' : transcript_from_words(words, scores=global_config.global_config.debug, times=global_config.global_config.debug, end=end),
+            'text' : transcript_from_words(words, scores=global_config.debug, times=global_config.debug, end=end),
             'words' : words,
             'end' : end
         } for words, end in transcripts]

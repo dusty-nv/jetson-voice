@@ -14,46 +14,12 @@ def ASR(resource, *args, **kwargs):
     """
     factory_map = {
         'jarvis' : 'jetson_voice.backends.jarvis.JarvisASRService',
-        'tensorrt' : 'jetson_voice.models.ASRModel',
-        'onnxruntime' : 'jetson_voice.models.ASRModel'
+        'tensorrt' : 'jetson_voice.models.ASREngine',
+        'onnxruntime' : 'jetson_voice.models.ASREngine'
     }
     
     return load_resource(resource, factory_map, *args, **kwargs)
-    
-    """
-    if isinstance(resource, str):
-        root, ext = os.path.splitext(resource)
-        
-        if len(ext) > 0:
-            ext = ext.lower()
-            
-            if ext == '.json':
-                config = ConfigDict(path=resource)
-            elif ext == '.onnx' or ext == '.engine' or ext == '.plan':
-                config = ConfigDict(path=root + '.json')
-            else:
-                raise ValueError(f"resource '{resource}' has invalid extension '{ext}'")
-        else:
-            config = ConfigDict(backend=resource)
-            
-    elif isinstance(resource, dict):
-        config = ConfigDict(resource)
-    else:
-        raise ValueError(f"expected string or dict type, instead got {type(resource).__name__}")
-    
-    config.setdefault('backend', global_config.default_backend)
-    
-    logging.info('ASR config\n', config)
-    
-    if config.backend == 'jarvis':
-        from jetson_voice.backends.jarvis import JarvisASRService
-        return JarvisASRService(config, *args, **kwargs)
-    elif config.backend == 'tensorrt' or config.backend == 'onnxruntime':
-        from jetson_voice.models import ASRModel
-        return ASRModel(config, *args, **kwargs)
-    else:
-        raise ValueError(f"invalid backend '{config.backend}' (valid options are: tensorrt, onnxruntime, jarvis)")
-    """
+
     
 class ASRService():
     """
@@ -83,7 +49,7 @@ class ASRService():
         pass
     
     @property
-    def classifier(self):
+    def classification(self):
         """
         Returns true if this is an ASR classification model (e.g. for VAD or keyword spotting)
         Otherwise, this is an ASR transcription model that converts audio to text.
@@ -146,7 +112,7 @@ if __name__ == "__main__":
         #print(f'samples {samples.shape} ({audio_db(samples):.1f} dB)')
         results = asr(samples)
         
-        if asr.classifier:
+        if asr.classification:
             print(f"class '{results[0]}' ({results[1]})")
         else:
             for transcript in results:

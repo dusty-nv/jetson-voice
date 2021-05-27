@@ -4,8 +4,8 @@
 import string
 import numpy as np
 
-from ctc_decoder import CTCDecoder
-from ctc_utils import merge_words, transcript_from_words
+from .ctc_decoder import CTCDecoder
+from .ctc_utils import merge_words, transcript_from_words
 
 from jetson_voice.utils import global_config
 

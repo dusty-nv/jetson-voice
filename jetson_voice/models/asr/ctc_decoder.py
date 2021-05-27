@@ -18,10 +18,10 @@ class CTCDecoder:
         type = config['type'].lower()
         
         if type == 'greedy':
-            from ctc_greedy import CTCGreedyDecoder
+            from .ctc_greedy import CTCGreedyDecoder
             return CTCGreedyDecoder(config, vocab)
         elif type == "beamsearch":
-            from ctc_beamsearch import CTCBeamSearchDecoder
+            from .ctc_beamsearch import CTCBeamSearchDecoder
             return CTCBeamSearchDecoder(config, vocab, resource_path)
         else:
             raise ValueError(f"invalid/unrecognized CTC decoder type '{type}'")

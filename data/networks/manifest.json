@@ -1,0 +1,13 @@
+{
+   "quartznet-15x5_en": {
+      "alias": ["quartznet", "quartznet_en", "quartznet.onnx"],
+      "domain": "asr",
+      "url": "https://nvidia.box.com/shared/static/l8gemvzp85os6xhge16igy1mzvtyvgbd.gz",
+      "config": "quartznet.json"
+   },
+   
+   "jarvis_asr": {
+      "type": "service",
+      "backend": "jarvis"
+   }
+}

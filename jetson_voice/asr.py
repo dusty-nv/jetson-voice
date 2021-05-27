@@ -86,7 +86,7 @@ if __name__ == "__main__":
     
     parser = ConfigArgParser()
     
-    parser.add_argument('--model', default='quartznet.onnx', type=str, help='path to model, service name, or json config file')
+    parser.add_argument('--model', default='quartznet', type=str, help='path to model, service name, or json config file')
     parser.add_argument('--wav', default='', type=str, help='path to input wav file')
     parser.add_argument('--mic', default=-1, type=int, help='device number of input microphone')
     parser.add_argument('--list-devices', action='store_true', help='list audio input devices')

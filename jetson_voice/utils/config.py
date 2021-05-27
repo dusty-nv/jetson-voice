@@ -25,6 +25,7 @@ import argparse
 _default_global_config = {
     'version' : 0.1,
     'model_dir' : 'data/networks',
+    'model_manifest' : 'data/networks/manifest.json',
     'default_backend' : 'tensorrt',
     'log_level' : 'info',
     'debug' : False,
@@ -178,7 +179,9 @@ class ConfigArgParser(argparse.ArgumentParser):
         super(ConfigArgParser, self).__init__(*args, **kwargs)
     
         self.add_argument('--model-dir', default=_default_global_config['model_dir'], help=f"sets the root path of the models (default '{_default_global_config['model_dir']}')")
+        self.add_argument('--model-manifest', default=_default_global_config['model_manifest'], help=f"sets the path to the model manifest file (default '{_default_global_config['model_manifest']}')")
         self.add_argument('--global-config', default=None, type=str, help='path to JSON file to load global configuration from')
+        self.add_argument('--list-models', action='store_true', help='lists the available models (from $model_dir/manifest.json)')
         self.add_argument('--profile', action='store_true', help='enables model performance profiling')
         self.add_argument('--verbose', action='store_true', help='sets the logging level to verbose')
         self.add_argument('--debug', action='store_true', help='sets the logging level to debug')
@@ -192,6 +195,7 @@ class ConfigArgParser(argparse.ArgumentParser):
         args = super(ConfigArgParser, self).parse_args(*args, **kwargs)
         
         global_config.model_dir = args.model_dir
+        global_config.model_manifest = args.model_manifest
         global_config.log_level = args.log_level
         
         if args.profile:
@@ -205,6 +209,10 @@ class ConfigArgParser(argparse.ArgumentParser):
         
         if args.global_config:
             global_config.load(args.global_config)
+            
+        if args.list_models:
+            from .resource import list_models
+            list_models()
             
         logging.debug(f'global config:\n{global_config}')    
         return args

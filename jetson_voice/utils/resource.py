@@ -85,7 +85,7 @@ def load_model(config, dynamic_shapes=None):
     """
     factory_map = {
         'tensorrt' : 'jetson_voice.backends.tensorrt.TRTModel',
-        'onnxruntime' : 'jetson_voice.backends.onnxruntime.ORTModel'
+        'onnxruntime' : 'jetson_voice.backends.onnxruntime.OnnxRuntimeModel'
     }
     
     config.setdefault('backend', global_config.default_backend)
@@ -105,7 +105,7 @@ def load_model(config, dynamic_shapes=None):
     class_name = factory_map[config.backend].rsplit(".", 1)
     class_type = getattr(importlib.import_module(class_name[0]), class_name[1])
     
-    logging.info(f"loading model '{config.model_path}' with {factory_map[config.backend]}")
+    logging.info(f"loading model '{config.model_path}' with {factory_map[config.backend]}()")
     logging.debug(class_type)
     
     return class_type(config, dynamic_shapes=dynamic_shapes)

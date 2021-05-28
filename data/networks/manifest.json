@@ -6,6 +6,13 @@
       "config": "quartznet.json"
    },
    
+   "fastpitch_hifigan": {
+      "alias": "fastpitch-hifigan",
+      "domain": "tts",
+      "url": "none",
+      "config": "fastpitch_hifigan.json"
+   },
+   
    "jarvis_asr": {
       "type": "service",
       "backend": "jarvis"

@@ -33,7 +33,7 @@ class ASREngine(ASRService):
         super(ASREngine, self).__init__(config, *args, **kwargs)
 
         if self.config.type != 'asr' and self.config.type != 'asr_classification':
-            raise ValueError(f"{model} isn't an ASR model (type '{self.type}'")
+            raise ValueError(f"{self.config.model_path} isn't an ASR model (type '{self.config.type}'")
 
         # set some default config options that are non-standard in nemo
         if 'ctc_decoder' not in self.config and not self.classification:

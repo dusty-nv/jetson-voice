@@ -99,6 +99,7 @@ class ConfigDict(dict):
     def __setitem__(self, key, value):
         if isinstance(value, dict):
             value = ConfigDict(value, watch=self.watch)
+            value.__dict__['path'] = self.path
             
         super(ConfigDict, self).__setitem__(key, value)
         self.__watch__(key, value)
@@ -124,9 +125,13 @@ class ConfigDict(dict):
     def setdefault(self, key, default=None):
         if isinstance(default, dict):
             value = ConfigDict(value, watch=self.watch)
+            value.__dict__['path'] = self.path
+            
         changed = key not in self
         value = super(ConfigDict, self).setdefault(key, default)
-        if changed: self.__watch__(key, value)
+        
+        if changed: 
+            self.__watch__(key, value)
         
     def update(self, *args, **kwargs):
         for k, v in dict(*args, **kwargs).items():

@@ -2,3 +2,4 @@
 # coding: utf-8
 
 from .asr import ASREngine
+from .tts import TTSEngine

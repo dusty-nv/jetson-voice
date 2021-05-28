@@ -46,9 +46,7 @@ class ASREngine(ASRService):
         
         self.config['streaming'].setdefault('frame_length', 1.0)    # duration of signal frame, seconds (TODO shorter defaults for VAD/command classifiers)
         self.config['streaming'].setdefault('frame_overlap', 0.5)   # duration of overlap before/after current frame, seconds
-        self.config['streaming'].setdefault('timestep_offset', 5)   # offset of output timesteps in the overlapping segments   (TODO move this to CTCDecoder)
-        self.config['streaming'].setdefault('symbol_offset', 0)     # number of symbols to drop for smooth streaming
-        
+
         # some config changes for streaming
         if not self.classification:
             self.config['preprocessor']['dither'] = 0.0
@@ -106,11 +104,11 @@ class ASREngine(ASRService):
         self.preprocessor = preprocessor_class(**preprocessor_config)
 
         # load the model
-        features = self.config.preprocessor.features
+        features = self.config.preprocessor.n_mels if self.classification else self.config.preprocessor.features
         time_to_fft = self.sample_rate * (1.0 / 160.0)     # rough conversion from samples to MEL spectrogram dims
         
         dynamic_shapes = {
-            'min' : (1, features, int(0.5 * time_to_fft)), # minimum plausible frame length
+            'min' : (1, features, int(0.1 * time_to_fft)), # minimum plausible frame length
             'opt' : (1, features, int(1.5 * time_to_fft)), # default of .5s overlap factor (1,64,121)
             'max' : (1, features, int(3.0 * time_to_fft))  # enough for 2s overlap factor
         }
@@ -185,7 +183,7 @@ class ASREngine(ASRService):
             return (self.config['labels'][argmax], prob)
         else:
             self.ctc_decoder.set_timestep_duration(self.timestep_duration)
-            self.ctc_decoder.set_timestep_offset(self.n_timesteps_frame - self.config['streaming']['timestep_offset'])
+            self.ctc_decoder.set_timestep_delta(self.n_timesteps_frame)
 
             if global_config.profile: ctc_decoder_begin = time.perf_counter()
             transcripts = self.ctc_decoder.decode(logits)

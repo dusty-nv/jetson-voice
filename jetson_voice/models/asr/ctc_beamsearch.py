@@ -108,7 +108,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
         if global_config.debug: 
             print(f'silent intervals:  {silent_intervals}')
 
-        self.timestep += self.timestep_offset
+        self.timestep += self.timestep_delta
         
         # split the words at EOS intervals
         if len(silent_intervals) > 0:

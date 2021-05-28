@@ -38,7 +38,7 @@ class TRTModel:
         if model_ext == '.onnx':
             engine_path = model_root + '.engine'
             if os.path.exists(engine_path):
-                logging.info(f'found cached TensorRT engine at {engine_path}')
+                logging.info(f'loading cached TensorRT engine from {engine_path}')
                 self.config.model_path = engine_path
                 model_ext = '.engine'
                 

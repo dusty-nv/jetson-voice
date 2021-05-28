@@ -183,10 +183,11 @@ class ConfigArgParser(argparse.ArgumentParser):
     def __init__(self, *args, **kwargs):
         super(ConfigArgParser, self).__init__(*args, **kwargs)
     
+        self.add_argument('--global-config', default=None, type=str, help='path to JSON file to load global configuration from')
         self.add_argument('--model-dir', default=_default_global_config['model_dir'], help=f"sets the root path of the models (default '{_default_global_config['model_dir']}')")
         self.add_argument('--model-manifest', default=_default_global_config['model_manifest'], help=f"sets the path to the model manifest file (default '{_default_global_config['model_manifest']}')")
-        self.add_argument('--global-config', default=None, type=str, help='path to JSON file to load global configuration from')
         self.add_argument('--list-models', action='store_true', help='lists the available models (from $model_dir/manifest.json)')
+        self.add_argument('--default-backend', default=_default_global_config['default_backend'], help=f"sets the default backend to use for model execution (default '{_default_global_config['default_backend']}')")
         self.add_argument('--profile', action='store_true', help='enables model performance profiling')
         self.add_argument('--verbose', action='store_true', help='sets the logging level to verbose')
         self.add_argument('--debug', action='store_true', help='sets the logging level to debug')
@@ -199,9 +200,11 @@ class ConfigArgParser(argparse.ArgumentParser):
     def parse_args(self, *args, **kwargs):
         args = super(ConfigArgParser, self).parse_args(*args, **kwargs)
         
-        global_config.model_dir = args.model_dir
-        global_config.model_manifest = args.model_manifest
         global_config.log_level = args.log_level
+        global_config.model_dir = args.model_dir
+        
+        global_config.model_manifest = args.model_manifest
+        global_config.default_backend = args.default_backend
         
         if args.profile:
             global_config.profile = True

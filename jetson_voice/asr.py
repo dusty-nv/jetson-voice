@@ -14,8 +14,8 @@ def ASR(resource, *args, **kwargs):
     """
     factory_map = {
         'jarvis' : 'jetson_voice.backends.jarvis.JarvisASRService',
-        'tensorrt' : 'jetson_voice.models.ASREngine',
-        'onnxruntime' : 'jetson_voice.models.ASREngine'
+        'tensorrt' : 'jetson_voice.models.asr.ASREngine',
+        'onnxruntime' : 'jetson_voice.models.asr.ASREngine'
     }
     
     return load_resource(resource, factory_map, *args, **kwargs)
@@ -79,11 +79,10 @@ class ASRService():
         pass
         
         
-        
 if __name__ == "__main__":
 
     from jetson_voice import list_audio_devices, AudioStream, ConfigArgParser
-    
+
     parser = ConfigArgParser()
     
     parser.add_argument('--model', default='quartznet', type=str, help='path to model, service name, or json config file')
@@ -97,6 +96,7 @@ if __name__ == "__main__":
     # list audio devices
     if args.list_devices:
         list_audio_devices()
+        os._exit(os.EX_OK)
         
     # load the model
     asr = ASR(args.model)
@@ -113,7 +113,7 @@ if __name__ == "__main__":
         results = asr(samples)
         
         if asr.classification:
-            print(f"class '{results[0]}' ({results[1]})")
+            print(f"class '{results[0]}' ({results[1]:.3f})")
         else:
             for transcript in results:
                 print(transcript['text'])

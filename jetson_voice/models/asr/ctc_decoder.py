@@ -36,6 +36,7 @@ class CTCDecoder:
         self.timestep = 0
         
         self.config.setdefault('vad_eos_duration', 0.65)  # max silent time until end-of-sentence
+        self.config.setdefault('timestep_offset', 5)      # number of symbols to drop for smooth streaming
         
     def decode(self, logits):
         """
@@ -67,11 +68,11 @@ class CTCDecoder:
         """
         self.timestep = timestep
     
-    def set_timestep_offset(self, offset):
+    def set_timestep_delta(self, offset):
         """
         Set the number of timesteps per frame.
         """
-        self.timestep_offset = offset
+        self.timestep_delta = offset - self.config['timestep_offset']
         
     def set_timestep_duration(self, duration):
         """

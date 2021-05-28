@@ -105,7 +105,7 @@ def load_model(config, dynamic_shapes=None):
     class_name = factory_map[config.backend].rsplit(".", 1)
     class_type = getattr(importlib.import_module(class_name[0]), class_name[1])
     
-    logging.info(f"loading model '{config.model_path}' with {factory_map[config.backend]}()")
+    logging.info(f"loading model '{config.model_path}' with {factory_map[config.backend]}")
     logging.debug(class_type)
     
     return class_type(config, dynamic_shapes=dynamic_shapes)
@@ -164,6 +164,8 @@ def download_model(name, max_attempts=10, retry_time=5):
     if manifest['type'] != 'model':
         return manifest
         
+    print(get_model_config_path(manifest=manifest))
+    
     if os.path.exists(get_model_config_path(manifest=manifest)):
         return manifest
 

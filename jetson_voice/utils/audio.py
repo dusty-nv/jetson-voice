@@ -69,11 +69,12 @@ class AudioMicStream:
     def __init__(self, device_id, sample_rate, chunk_size):
         self.p = pa.PyAudio()
         self.device_id = device_id
+        self.device_info = self.p.get_device_info_by_host_api_device_index(0, device_id)
         self.sample_rate = sample_rate
         self.chunk_size = chunk_size
         self.stream = None
         
-        print(self.p.get_device_info_by_host_api_device_index(0, device_id))
+        print(self.device_info)
     
     def __del__(self):
         self.close()
@@ -88,6 +89,9 @@ class AudioMicStream:
                             input_device_index=self.device_id,
                             frames_per_buffer=self.chunk_size)
      
+            print(f"\naudio stream opened on device {self.device_id} ({self.device_info['name']})")
+            print("you can begin speaking now...\n")
+            
     def close(self):
         if self.stream is not None:
             self.stream.stop_stream()

@@ -51,10 +51,10 @@ def build_engine(config,
     
     if precision == 'fp16':
         builder_config.set_flag(trt.BuilderFlag.FP16)
-        logging.info(f'enabled FP16 ({builder_config.flags})')
+        logging.info(f'enabled FP16 precision')
     elif precision == 'int8':
         # https://github.com/NVIDIA/TensorRT/blob/d7baf010e4396c87d58e4d8a33052c01c2d89325/demo/BERT/builder.py#L592
-        raise NotImplementedError('int8 support not yet implemented')
+        raise NotImplementedError('INT8 support not yet implemented')
         
     # load the model (from ONNX)
     logging.info(f'loading {config.model_path}')
@@ -106,13 +106,7 @@ def build_engine(config,
     """           
     
     # TODO support different shape profiles for different input tensors
-    if dynamic_shapes is not None:
-        # NLP BERT models (and BERT derivatives) have myelin problem with dynamic shapes on aarch64
-        if any(config.type.lower() == x for x in ['qa', 'intent_slot', 'text_classification', 'token_classification']): 
-            logging.debug('disabling dynamic shapes for NLP models')
-            dynamic_shapes['min'] = dynamic_shapes['max']
-            dynamic_shapes['opt'] = dynamic_shapes['max']
-        
+    if dynamic_shapes is not None:        
         if 'min' not in dynamic_shapes:
             dynamic_shapes['min'] = dynamic_shapes['max']
             

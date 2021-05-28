@@ -83,7 +83,7 @@ class CTCGreedyDecoder(CTCDecoder):
         words = merge_words(self.words, words, self.config['word_threshold'], 'overlap')
         
         # increment timestep (after this frame's timestep is done being used, and before a potential EOS reset)
-        self.timestep += self.timestep_offset
+        self.timestep += self.timestep_delta
         
         # check for EOS
         end = False

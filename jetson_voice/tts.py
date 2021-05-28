@@ -14,8 +14,8 @@ def TTS(resource, *args, **kwargs):
     See the TTSService class for the signature that implementations use.
     """
     factory_map = {
-        'tensorrt' : 'jetson_voice.models.TTSEngine',
-        'onnxruntime' : 'jetson_voice.models.TTSEngine'
+        'tensorrt' : 'jetson_voice.models.tts.TTSEngine',
+        'onnxruntime' : 'jetson_voice.models.tts.TTSEngine'
     }
     
     return load_resource(resource, factory_map, *args, **kwargs)

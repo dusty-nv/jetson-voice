@@ -6,10 +6,57 @@
       "config": "quartznet.json"
    },
    
+   "matchboxnet-3x1x64_subset": {
+      "alias": ["matchboxnet", "matchboxnet-3x1x64", "matchboxnet_3x1x64", "matchboxnet_3x1x64_subset"],
+      "domain": "asr",
+      "url": "https://nvidia.box.com/shared/static/55hpzf7z9y8e5pzv0llbd90d2xv8zr7s.gz",
+      "config": "matchboxnet-3x1x64_subset.json"
+   },
+   
+   "vad_marblenet": {
+      "alias": ["vad", "marblenet"],
+      "domain": "asr",
+      "url": "https://nvidia.box.com/shared/static/39i42kgn37p23l85ngvccjj73vrbs73r.gz",
+      "config": "vad_marblenet.json"
+   },
+   
+   "distilbert_intent": {
+      "alias": "distilbert_intent_slot",
+      "domain": "nlp",
+      "url": "https://nvidia.box.com/shared/static/5zvrv4yhqq77y2spg4ibfo5os0hu0hof.gz",
+      "config": "distilbert_intent.json"
+   },
+   
+   "distilbert_qa_128": {
+      "alias": "distilbert_qa",
+      "domain": "nlp",
+      "url": "https://nvidia.box.com/shared/static/5s2koroxvbgwasyugdeaan8s70eiynco.gz",
+      "config": "distilbert_qa_128.json"
+   },
+   
+   "distilbert_qa_384": {
+      "alias": "distilbert_qa",
+      "domain": "nlp",
+      "url": "https://nvidia.box.com/shared/static/py5iqn1b76bixz2g5jqp84iei315f2st.gz",
+      "config": "distilbert_qa_384.json"
+   },
+   
+   "distilbert_sentiment": {
+      "domain": "nlp",
+      "url": "https://nvidia.box.com/shared/static/4axv3zyfwhnr260znk3kpuas0ytq5yu1.gz",
+      "config": "distilbert_sentiment.json"
+   },
+   
+   "distilbert_ner": {
+      "domain": "nlp",
+      "url": "https://nvidia.box.com/shared/static/v30p291p5lczblznta71pj9uhessxebv.gz",
+      "config": "distilbert_ner.json"
+   },
+   
    "fastpitch_hifigan": {
       "alias": "fastpitch-hifigan",
       "domain": "tts",
-      "url": "none",
+      "url": "https://nvidia.box.com/shared/static/pp6mffer2zpxfbq165l6y1tw231mls2g.gz",
       "config": "fastpitch_hifigan.json"
    },
    

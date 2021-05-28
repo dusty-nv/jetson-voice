@@ -78,7 +78,7 @@ class TRTModel:
         for binding in self.bindings:
             print(f'\n{binding}')
 
-    def execute(self, inputs, sync=True, return_dict=False):
+    def execute(self, inputs, sync=True, return_dict=False, **kwargs):
         """
         Run the DNN model in TensorRT.  The inputs are provided as numpy arrays in a list/tuple/dict.
         Note that run() doesn't perform any pre/post-processing - this is typically done in subclasses.

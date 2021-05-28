@@ -163,7 +163,12 @@ def build_engine(config,
     
     # build the engine
     build_start_time = time.time()
+    
     engine = builder.build_engine(network, builder_config)
+    
+    if engine is None:
+        raise ValueError(f"failed to build TensorRT engine for '{config.model_path}'")
+        
     build_time_elapsed = (time.time() - build_start_time)
     print(f'\nbuilt engine in {build_time_elapsed} seconds')
 

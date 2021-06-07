@@ -3,7 +3,6 @@
 
 import os
 import time
-import utils
 import pprint
 import logging
 import importlib

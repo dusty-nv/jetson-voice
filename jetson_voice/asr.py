@@ -2,6 +2,7 @@
 # coding: utf-8
 
 import os
+import sys
 import logging
 
 from jetson_voice.utils import load_resource
@@ -96,7 +97,7 @@ if __name__ == "__main__":
     # list audio devices
     if args.list_devices:
         list_audio_devices()
-        os._exit(os.EX_OK)
+        sys.exit()
         
     # load the model
     asr = ASR(args.model)

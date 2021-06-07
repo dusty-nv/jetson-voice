@@ -55,6 +55,7 @@ DOCKER_ROOT="/jetson-voice"
 DATA_VOLUME="\
 --volume $PWD/data:$DOCKER_ROOT/data \
 --volume $PWD/scripts:$DOCKER_ROOT/scripts \
+--volume $PWD/tests:$DOCKER_ROOT/tests \
 --volume $PWD/jetson_voice:$DOCKER_ROOT/jetson_voice"
 
 # parse user arguments

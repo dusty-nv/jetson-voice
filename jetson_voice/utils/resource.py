@@ -164,8 +164,6 @@ def download_model(name, max_attempts=10, retry_time=5):
     if manifest['type'] != 'model':
         return manifest
         
-    print(get_model_config_path(manifest=manifest))
-    
     if os.path.exists(get_model_config_path(manifest=manifest)):
         return manifest
 

@@ -29,10 +29,10 @@ elif [ $ARCH = "x86_64" ]; then
 fi
 
 echo "BASE_IMAGE=$BASE_IMAGE"
-echo "TAG=jetson-voice:$TAG"
+echo "CONTAINER=$CONTAINER_NAME:$TAG"
 
 # build the container
-sudo docker build -t jetson-voice:$TAG -f Dockerfile.$ARCH \
+sudo docker build -t $CONTAINER_NAME:$TAG -f Dockerfile.$ARCH \
           --build-arg BASE_IMAGE=$BASE_IMAGE \
 		--build-arg NEMO_VERSION=$NEMO_VERSION \
 		.

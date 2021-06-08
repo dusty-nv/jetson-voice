@@ -24,6 +24,10 @@ show_help() {
     echo "   -c, --container DOCKER_IMAGE Specifies the name of the Docker container"
     echo "                                image to use (default: 'jetson-voice')"
     echo " "
+    echo "   -d, --dev  Runs the container in development mode, where the source"
+    echo "              files are mounted into the container dynamically, so they"
+    echo "              can more easily be edited from the host machine."
+    echo " "
     echo "   -v, --volume HOST_DIR:MOUNT_DIR Mount a path from the host system into"
     echo "                                   the container.  Should be specified as:"
     echo " "
@@ -52,11 +56,8 @@ source docker/tag.sh
 DOCKER_ROOT="/jetson-voice"	
 
 # generate mount commands
-DATA_VOLUME="\
---volume $PWD/data:$DOCKER_ROOT/data \
---volume $PWD/scripts:$DOCKER_ROOT/scripts \
---volume $PWD/tests:$DOCKER_ROOT/tests \
---volume $PWD/jetson_voice:$DOCKER_ROOT/jetson_voice"
+DATA_VOLUME="--volume $PWD/data:$DOCKER_ROOT/data"
+DEV_VOLUME=""
 
 # parse user arguments
 USER_VOLUME=""
@@ -81,6 +82,9 @@ while :; do
             ;;
         --container=)         # Handle the case of an empty --image=
             die 'ERROR: "--container" requires a non-empty option argument.'
+            ;;
+	   -d|--dev)
+            DEV_VOLUME="--volume $PWD/jetson_voice:$DOCKER_ROOT/jetson_voice --volume $PWD/scripts:$DOCKER_ROOT/scripts --volume $PWD/tests:$DOCKER_ROOT/tests"
             ;;
         -v|--volume)
             if [ "$2" ]; then
@@ -119,6 +123,7 @@ while :; do
 done
 
 echo "CONTAINER:     $CONTAINER_IMAGE"
+echo "DEV_VOLUME:    $DEV_VOLUME"
 echo "DATA_VOLUME:   $DATA_VOLUME"
 echo "USER_VOLUME:   $USER_VOLUME"
 echo "USER_COMMAND:  $USER_COMMAND"
@@ -128,13 +133,14 @@ MOUNTS="\
 --device /dev/bus/usb \
 --volume /etc/timezone:/etc/timezone:ro \
 --volume /etc/localtime:/etc/localtime:ro \
+$DEV_VOLUME \
 $DATA_VOLUME \
 $USER_VOLUME"
 
 if [ $ARCH = "aarch64" ]; then
 
 	sudo docker run --runtime nvidia -it --rm --network host \
-	    $MOUNTS jetson-voice:$TAG $USER_COMMAND
+	    $MOUNTS $CONTAINER_IMAGE $USER_COMMAND
 	    
 elif [ $ARCH = "x86_64" ]; then
 
@@ -142,6 +148,6 @@ elif [ $ARCH = "x86_64" ]; then
 		--shm-size=8g \
 		--ulimit memlock=-1 \
 		--ulimit stack=67108864 \
-		$MOUNTS jetson-voice:$TAG $USER_COMMAND
+		$MOUNTS $CONTAINER_IMAGE $USER_COMMAND
 		
 fi

@@ -1,0 +1,7 @@
+[
+   {
+      "source": "test_asr.py",
+      "config": "asr.json",
+      "model": "quartznet"
+   }
+]

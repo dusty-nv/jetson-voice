@@ -1,0 +1,18 @@
+[
+   {
+      "queries": [
+         "Set alarm for Seven Thirty AM",
+         "Please increase the volume",
+         "What is my schedule for tomorrow",
+         "Place an order for a large pepperoni pizza from Dominos"
+      ],
+      "outputs": {
+         "distilbert_intent": [
+            "alarm_set time=Seven time=Thirty time=AM",
+            "audio_volume_up",
+            "calendar_query date=tomorrow",
+            "takeaway_order food_type=pepperoni food_type=pizza food_type=Dominos"
+         ]
+      }
+   }
+]

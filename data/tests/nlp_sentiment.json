@@ -1,0 +1,22 @@
+[
+   {
+      "queries": [
+         "By the end of no such thing the audience, like beatrice, has a watchful affection for the monster.",
+         "Director Rob Marshall went out gunning to make a great one.",
+         "Uneasy mishmash of styles and genres.",
+         "I love exotic science fiction / fantasy movies but this one was very unpleasant to watch. I gave it 4 / 10 since some special effects were nice.",
+         "Today was cold and rainy and not very nice.",
+         "Today was warm, sunny and beautiful out."
+      ],
+      "outputs": {
+         "distilbert_sentiment": [
+            "1",
+            "1",
+            "0",
+            "1",
+            "0",
+            "1"
+         ]
+      }
+   }
+]

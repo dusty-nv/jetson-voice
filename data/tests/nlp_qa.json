@@ -1,0 +1,36 @@
+[
+   {
+      "context": "Some people have said that Pi is tasty but there should be a value for Pi, and the value for Pi is around 3.14. Pi is the ratio of a circle's circumference to it's diameter. The constant Pi was first calculated by Archimedes in ancient Greece around the year 250 BC.",
+      "questions": [
+         "What is the value of Pi?",
+         "Who discovered Pi?"
+      ],
+      "outputs": {
+         "distilbert_qa_128": [
+            "3.14",
+            "Archimedes"
+         ],
+         "distilbert_qa_384": [
+            "3.14",
+            "Archimedes"
+         ]
+      }
+   },
+   {
+      "context": "The Amazon rainforest is a moist broadleaf forest that covers most of the Amazon basin of South America. This basin encompasses 7,000,000 square kilometres (2,700,000 sq mi), of which 5,500,000 square kilometres (2,100,000 sq mi) are covered by the rainforest. The majority of the forest is contained within Brazil, with 60% of the rainforest, followed by Peru with 13%, and Colombia with 10%.",
+      "questions": [
+         "Which nation contains the majority of the Amazon forest?",
+         "How large is the Amazon rainforest?"
+      ],
+      "outputs": {
+         "distilbert_qa_128": [
+            "Brazil",
+            "7,000,000 square kilometres (2,700,000 sq mi)"
+         ],
+         "distilbert_qa_384": [
+            "Brazil",
+            "7,000,000 square kilometres"
+         ]
+      }
+   }
+]

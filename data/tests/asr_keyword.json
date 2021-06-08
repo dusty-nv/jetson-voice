@@ -1,0 +1,58 @@
+[
+   {
+      "wav": "data/audio/commands.wav",
+      "outputs": {
+         "matchboxnet": [
+            "unknown",
+            "yes",
+            "no",
+            "up",
+            "down",
+            "left",
+            "left",
+            "right",
+            "on",
+            "off",
+            "stop",
+            "go",
+            "go",
+            "silence",
+            "silence"
+         ]
+      }
+   },
+   {
+      "wav": "data/audio/command_go.wav",
+      "outputs": {
+         "matchboxnet": [
+            "go"
+         ]
+      }
+   },
+   {
+      "wav": "data/audio/command_no.wav",
+      "outputs": {
+         "matchboxnet": [
+            "no",
+            "no"
+         ]
+      }
+   },
+   {
+      "wav": "data/audio/command_stop.wav",
+      "outputs": {
+         "matchboxnet": [
+            "stop"
+         ]
+      }
+   },
+   {
+      "wav": "data/audio/command_yes.wav",
+      "outputs": {
+         "matchboxnet": [
+            "yes",
+            "yes"
+         ]
+      }
+   }
+]

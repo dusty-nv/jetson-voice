@@ -1,0 +1,26 @@
+[
+   {
+      "queries": [
+         "But candidate Charles Baker, who has about eight percent of the vote, has called for an investigation into reports of people voting multiple times.",
+         "Analysts say Mr. Chung's comments may be part of efforts by South Korea to encourage North Korea to resume bilateral talks.",
+         "The 63-year-old Daltrey walked offstage during the first song; guitarist Pete Townshend later told the crowd he was suffering from bronchitis and could barely speak.",
+         "The Who is currently touring in support of Endless Wire, its first album since 1982.",
+         "Meanwhile, Iowa is cleaning up after widespread flooding inundated homes, destroyed crops and cut off highways and bridges.",
+         "At the White House Tuesday, U.S. President George Bush expressed concern for the flood victims.",
+         "Ben is from Chicago, a city in the state of Illinois, US with a population of 2.7 million people.",
+         "Lisa's favorite place to climb in the summer is El Capitan in Yosemite National Park in California, U.S."
+      ],
+      "outputs": {
+         "distilbert_ner": [
+            "But candidate Charles[B-PER] Baker[I-PER], who has about eight percent of the vote, has called for an investigation into reports of people voting multiple times.",
+            "Analysts say Mr[B-PER]. Chung's[I-PER] comments may be part of efforts by South[B-LOC] Korea[I-LOC] to encourage North[B-LOC] Korea[I-LOC] to resume bilateral talks.",
+            "The 63-year-old Daltrey[B-PER] walked offstage during the first song; guitarist Pete[B-PER] Townshend[I-PER] later told the crowd he was suffering from bronchitis and could barely speak.",
+            "The Who[B-ORG] is currently touring in support of Endless[B-ORG] Wire[I-ORG], its first album since[B-TIME] 1982[I-TIME].",
+            "Meanwhile, Iowa[B-LOC] is cleaning up after widespread flooding inundated homes, destroyed crops and cut off highways and bridges.",
+            "At the White[B-ORG] House[I-ORG] Tuesday[B-TIME], U.S[B-ORG]. President[B-PER] George[I-PER] Bush[I-PER] expressed concern for the flood victims.",
+            "Ben[B-PER] is from Chicago[B-LOC], a city in the state of Illinois[B-LOC], US[B-LOC] with a population of 2.7 million people.",
+            "Lisa's[B-PER] favorite place to climb in the summer[B-TIME] is El[B-PER] Capitan[I-PER] in Yosemite[B-LOC] National[I-LOC] Park[I-LOC] in California[B-LOC], U.S[B-LOC]."
+         ]
+      }
+   }
+]

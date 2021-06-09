@@ -124,6 +124,7 @@ def load_models_manifest(path=None):
         
     for key in manifest:
         manifest[key].setdefault('name', key)
+        manifest[key].setdefault('config', key + '.json')
         manifest[key].setdefault('type', 'model')
         
     return manifest
@@ -222,11 +223,17 @@ def get_model_config_path(name=None, manifest=None):
         
     if manifest['type'] != 'model':
         raise ValueError(f"resource '{manifest['name']}' is not a model (type='{manifest['type']}')")
-     
-    return os.path.join(global_config.model_dir, manifest['domain'], manifest['name'], manifest['config'])
+    
+    if len(os.path.dirname(manifest['config'])) > 0:  # if full path is specified
+        return os.path.join(global_config.model_dir, manifest['domain'], manifest['config'])
+    else:  
+        return os.path.join(global_config.model_dir, manifest['domain'], manifest['name'], manifest['config'])
     
    
 def list_models():
+    """
+    Print out the models available.
+    """
     manifest = load_models_manifest()
     
     print('')

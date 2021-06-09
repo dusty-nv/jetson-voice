@@ -8,6 +8,13 @@
             "today is wednesday tomorrow is thursday.",
             "i would like to order a large pepperoni pizza.",
             "is it going to be cloudy tomorrow"
+         ],
+         "quartznet_greedy": [
+            "hi this is dusty check one two two thre.",
+            "what s the weather go going to be tomorow in pitsburgh.",
+            "today is i wednesday tomorow is thursday.",
+            "i would like ti to order a large peperoni piza.",
+            "is it going to to be cloudy tomorow"
          ]
       }
    },
@@ -26,6 +33,14 @@
             "off.",
             "to.",
             "go."
+         ],
+         "quartznet_greedy": [
+            "is it going to to be cloudy tomorow.",
+            "yes.",
+            "no up down left right.",
+            "on of stop go.",
+            ".",
+            "."
          ]
       }
    }

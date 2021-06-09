@@ -6,6 +6,11 @@
    },
    {
       "module": "test_asr.py",
+      "config": "asr.json",
+      "model": "quartznet_greedy"
+   },
+   {
+      "module": "test_asr.py",
       "config": "asr_keyword.json",
       "model": "matchboxnet"
    },

@@ -1,63 +1,72 @@
 {
    "quartznet-15x5_en": {
-      "alias": ["quartznet", "quartznet_en", "quartznet.onnx"],
+      "alias": ["quartznet", "quartznet_en"],
       "domain": "asr",
       "url": "https://nvidia.box.com/shared/static/l8gemvzp85os6xhge16igy1mzvtyvgbd.gz",
-      "config": "quartznet.json"
+      "config": "quartznet.json",
+      "description": "QuartzNet-15x5 ASR using CTC beamsearch decoder with language model, trained on 7,050 hours of audio data (English).  Please see to the stt_en_quartznet15x5 NeMo model for more info."
+   },
+   
+   "quartznet-15x5-greedy_en": {
+      "alias": ["quartznet_greedy", "quartznet_greedy_en"],
+      "domain": "asr",
+      "url": "https://nvidia.box.com/shared/static/l8gemvzp85os6xhge16igy1mzvtyvgbd.gz",
+      "config": "quartznet-15x5_en/quartznet.greedy.json",
+      "description": "QuartzNet-15x5 ASR using CTC greedy decoder, trained on 7,050 hours of audio data (English).  Please see to the stt_en_quartznet15x5 NeMo model for more info."
    },
    
    "matchboxnet-3x1x64_subset": {
       "alias": ["matchboxnet", "matchboxnet-3x1x64", "matchboxnet_3x1x64", "matchboxnet_3x1x64_subset"],
       "domain": "asr",
       "url": "https://nvidia.box.com/shared/static/55hpzf7z9y8e5pzv0llbd90d2xv8zr7s.gz",
-      "config": "matchboxnet-3x1x64_subset.json"
+      "description": "Audio keyword/command recognition using MatchboxNet architecture, trained on 12 classes from the Google Speech Commands Dataset.  Please see to the commandrecognition_en_matchboxnet3x1x64_v2_subset_task NeMo model for more info."
    },
    
    "vad_marblenet": {
       "alias": ["vad", "marblenet"],
       "domain": "asr",
       "url": "https://nvidia.box.com/shared/static/39i42kgn37p23l85ngvccjj73vrbs73r.gz",
-      "config": "vad_marblenet.json"
+      "description": "Voice Activity Detector (VAD) using MarbleNet architecture - classifier with two labels:  background and speech.  Please see the vad_marblenet model for more info."
    },
    
    "distilbert_intent": {
       "alias": "distilbert_intent_slot",
       "domain": "nlp",
       "url": "https://nvidia.box.com/shared/static/5zvrv4yhqq77y2spg4ibfo5os0hu0hof.gz",
-      "config": "distilbert_intent.json"
+      "description": "DistilBERT joint intent/slot classifier, trained on the NLU-Evaluation-Data dataset."
    },
    
    "distilbert_qa_128": {
       "alias": "distilbert_qa",
       "domain": "nlp",
       "url": "https://nvidia.box.com/shared/static/5s2koroxvbgwasyugdeaan8s70eiynco.gz",
-      "config": "distilbert_qa_128.json"
+      "description": "DistilBERT question/answering with maximum sequence length 128, trained on SQuAD v1.1 dataset."
    },
    
    "distilbert_qa_384": {
       "alias": "distilbert_qa",
       "domain": "nlp",
       "url": "https://nvidia.box.com/shared/static/py5iqn1b76bixz2g5jqp84iei315f2st.gz",
-      "config": "distilbert_qa_384.json"
+      "description": "DistilBERT question/answering with maximum sequence length 384, trained on SQuAD v1.1 dataset."
    },
    
    "distilbert_sentiment": {
       "domain": "nlp",
       "url": "https://nvidia.box.com/shared/static/4axv3zyfwhnr260znk3kpuas0ytq5yu1.gz",
-      "config": "distilbert_sentiment.json"
+      "description": "DistilBERT text classifier for sentiment analysis, trained on the Stanford Sentiment Treebank (SST-2) dataset."
    },
    
    "distilbert_ner": {
       "domain": "nlp",
       "url": "https://nvidia.box.com/shared/static/v30p291p5lczblznta71pj9uhessxebv.gz",
-      "config": "distilbert_ner.json"
+      "description": "DistilBERT token classifier for Named Entity Recognition (NER), trained on the GMB (Groningen Meaning Bank) dataset."
    },
    
    "fastpitch_hifigan": {
       "alias": "fastpitch-hifigan",
       "domain": "tts",
       "url": "https://nvidia.box.com/shared/static/pp6mffer2zpxfbq165l6y1tw231mls2g.gz",
-      "config": "fastpitch_hifigan.json"
+      "description": "TTS ensemble using FastPitch model for MEL spectorgram generation and a HiFiGAN model vocoder.  Female voice for speaking English."
    },
    
    "jarvis_asr": {

@@ -39,6 +39,7 @@ def load_resource(resource, factory_map, *args, **kwargs):
     """
     Load an instance of a resource from a config or service name.
     The factory_map dict maps the backend names to class names.
+    Returns the resource instance, or the config if factory_map is null.
     """
     if isinstance(resource, str):
         root, ext = os.path.splitext(resource)
@@ -58,8 +59,10 @@ def load_resource(resource, factory_map, *args, **kwargs):
             if manifest['type'] == 'model':
                 config = ConfigDict(path=get_model_config_path(manifest=manifest))
             else:
-                config = ConfigDict(backend=manifest['backend'])
-            
+                config = ConfigDict(backend=manifest['backend'], type=manifest['name'])
+    
+    elif isinstance(resource, ConfigDict):
+        config = resource
     elif isinstance(resource, dict):
         config = ConfigDict(resource)
     else:
@@ -67,6 +70,9 @@ def load_resource(resource, factory_map, *args, **kwargs):
     
     config.setdefault('backend', global_config.default_backend)
     
+    if factory_map is None:
+        return config
+        
     if config.backend not in factory_map:
         raise ValueError(f"'{config.path}' has invalid backend '{config.backend}' (valid options are: {', '.join(factory_map.keys())})")
         

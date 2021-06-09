@@ -1,9 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import os
-import pprint
-
 from jetson_voice.utils import load_resource
 
 
@@ -47,7 +44,7 @@ class IntentSlotService():
                   'score' (float) -- the slot probability [0,1]
         """
         pass
- 
+
  
 def QuestionAnswer(resource, *args, **kwargs):
     """
@@ -207,6 +204,7 @@ class TokenClassificationService():
 if __name__ == "__main__":
 
     from jetson_voice import ConfigArgParser
+    import pprint
     
     parser = ConfigArgParser()
     

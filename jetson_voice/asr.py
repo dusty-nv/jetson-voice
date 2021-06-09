@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import os
-import sys
-import logging
-
 from jetson_voice.utils import load_resource
 
 
@@ -83,7 +79,8 @@ class ASRService():
 if __name__ == "__main__":
 
     from jetson_voice import list_audio_devices, AudioStream, ConfigArgParser
-
+    import sys
+    
     parser = ConfigArgParser()
     
     parser.add_argument('--model', default='quartznet', type=str, help='path to model, service name, or json config file')

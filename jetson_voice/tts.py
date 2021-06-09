@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
 
-import os
-import time
-import logging
-
 from jetson_voice.utils import load_resource
 
 
@@ -57,6 +53,7 @@ if __name__ == "__main__":
     
     import pprint
     import pyaudio
+    import time
     
     parser = ConfigArgParser()
     

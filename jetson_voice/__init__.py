@@ -16,4 +16,6 @@ from .nlp import (
     TokenClassification, TokenClassificationService,
 )
 
+from .auto import AutoModel
+
 __version__ = global_config.version

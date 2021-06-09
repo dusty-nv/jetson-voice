@@ -8,14 +8,12 @@ import nltk
 import pprint
 import logging
 
-from jetson_voice import IntentSlot, QuestionAnswer, TextClassification, TokenClassification, ConfigArgParser
+from jetson_voice import AutoModel, ConfigArgParser
 
 
-types = ['intent_slot', 'qa', 'text_classification', 'token_classification']
 parser = ConfigArgParser()
 
 parser.add_argument('--model', default='distilbert_qa_128', type=str, help='path to model, service name, or json config file')
-parser.add_argument('--type', type=str, required=True, choices=types, help='the model type')
 parser.add_argument('--config', type=str, required=True, help='path to test config file')
 parser.add_argument('--threshold', type=int, default=0, help='threshold for comparing actual vs expected outputs')
 parser.add_argument('--generate', action='store_true', help='generate the expected outputs')
@@ -25,7 +23,7 @@ print(args)
 
 print('')
 print('----------------------------------------------------')
-print(f' RUNNING TEST (NLP {args.type})')
+print(f' RUNNING TEST (NLP)')
 print('----------------------------------------------------')
 print(f'   model:  {args.model}')
 print(f'   config: {args.config}')
@@ -36,6 +34,10 @@ with open(args.config) as config_file:
     test_config = json.load(config_file)
 
 # load the model
+model = AutoModel(args.model, domain='nlp')
+type = model.config.type
+
+"""
 if args.type == 'intent_slot':
     model = IntentSlot(args.model)
 elif args.type == 'qa':
@@ -44,7 +46,8 @@ elif args.type == 'text_classification':
     model = TextClassification(args.model)
 elif args.type == 'token_classification':
     model = TokenClassification(args.model)
-    
+"""
+   
 # list of (passed, num_outputs) tuples
 test_results = []
 
@@ -52,7 +55,7 @@ test_results = []
 for test in test_config:
     outputs = []
     
-    if args.type == 'intent_slot':
+    if type == 'intent_slot':
         for query in test['queries']:
             results = model(query)
             
@@ -68,7 +71,7 @@ for test in test_config:
                 
             outputs.append(result_str)
             
-    elif args.type == 'qa':
+    elif type == 'qa':
         for question in test['questions']:
             query = {
                 'question': question,
@@ -87,7 +90,7 @@ for test in test_config:
             
             outputs.append(answer['answer'])
     
-    elif args.type == 'text_classification':
+    elif type == 'text_classification':
         for query in test['queries']:
             results = model(query)
             
@@ -98,7 +101,7 @@ for test in test_config:
             
             outputs.append(results['label'])
     
-    elif args.type == 'token_classification':
+    elif type == 'token_classification':
         for query in test['queries']:
             results = model(query)
             result_str = model.tag_string(query, results)
@@ -163,10 +166,11 @@ for passed, num_outputs in test_results:
 
 print('')
 print('----------------------------------------------------')
-print(f' TEST RESULTS (NLP {args.type})')
+print(f' TEST RESULTS (NLP)')
 print('----------------------------------------------------')
 print(f'   model:  {args.model}')
 print(f'   config: {args.config}')
+print(f'   type:   {type}')
 print(f'   passed: {passed_tests} / {len(test_config)} tests')
 print(f'           {passed_outputs} / {total_outputs} queries')
 print('')

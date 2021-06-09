@@ -22,32 +22,27 @@
    {
       "module": "test_nlp.py",
       "config": "nlp_qa.json",
-      "model": "distilbert_qa_128",
-      "args": "--type=qa"
+      "model": "distilbert_qa_128"
    },
    {
       "module": "test_nlp.py",
       "config": "nlp_qa.json",
-      "model": "distilbert_qa_384",
-      "args": "--type=qa"
+      "model": "distilbert_qa_384"
    },
    {
       "module": "test_nlp.py",
       "config": "nlp_intent.json",
-      "model": "distilbert_intent",
-      "args": "--type=intent_slot"
+      "model": "distilbert_intent"
    },
    {
       "module": "test_nlp.py",
       "config": "nlp_sentiment.json",
-      "model": "distilbert_sentiment",
-      "args": "--type=text_classification"
+      "model": "distilbert_sentiment"
    },
    {
       "module": "test_nlp.py",
       "config": "nlp_token.json",
-      "model": "distilbert_ner",
-      "args": "--type=token_classification"
+      "model": "distilbert_ner"
    },
    {
       "module": "test_tts.py",

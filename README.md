@@ -123,11 +123,11 @@ hey how are you guys.
 
 ## ASR Classification
 
-There are other ASR models included for command/keyword recognition ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) and voice activity detection ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing the text.  
+There are other ASR models included for command/keyword recognition ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) and voice activity detection ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing text.  
 
 ### Command/Keyword Recognition
 
-The ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) model was trained on 12 keywords:
+The [MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands) model was trained on 12 keywords from the [Google Speech Commands](https://ai.googleblog.com/2017/08/launching-speech-commands-dataset.html) dataset:
 
 ```
 # MatchboxNet classes
@@ -167,9 +167,11 @@ class 'silence' (0.639)
 class 'silence' (0.576)
 ```
 
+The numbers printed on the right are the classification probabilities between 0 and 1.
+
 ### Voice Activity Detection (VAD)
 
-The voice activity model ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad))) is a binary model that outputs `background` or `speech`:
+The voice activity model ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)) is a binary model that outputs `background` or `speech`:
 
 ``` bash
 $ examples/asr.py --model vad_marblenet --wav data/audio/commands.wav
@@ -189,9 +191,6 @@ class 'background' (0.988)
 class 'background' (0.784)
 ```
 
-The numbers printed on the right are the classification probabilities between 0 and 1.
-
-
 ## NLP
 
 There are two samples included for NLP:
@@ -199,7 +198,7 @@ There are two samples included for NLP:
 * [`examples/nlp.py`](examples/nlp.py) (intent/slot, text classification, token classification)
 * [`examples/nlp_qa.py`](examples/nlp_qa.py) (question/answering)
 
-These each use a DistilBERT model which has been fined-tuned for it's particular task.  For information about using the NLP APIs, please refer to [`jetson_voice/nlp.py`](jetson_voice/nlp.py) and see the samples above.
+These each use a [DistilBERT](https://arxiv.org/abs/1910.01108) model which has been fined-tuned for it's particular task.  For information about using the NLP APIs, please refer to [`jetson_voice/nlp.py`](jetson_voice/nlp.py) and see the samples above.
 
 ### Joint Intent/Slot Classification
 
@@ -248,7 +247,7 @@ Enter intent_slot query, or Q to quit:
 
 ### Text Classification
 
-In this text classification example, we'll use the included sentiment analysis model that was trained on the [Standford Sentiment Treebank (SST-2)](https://nlp.stanford.edu/sentiment/index.html) dataset.  It will label queries as either positive or negative, along with their classification probability:
+In this text classification example, we'll use the included sentiment analysis model that was trained on the [Standford Sentiment Treebank (SST-2)](https://nlp.stanford.edu/sentiment/index.html) dataset.  It will label queries as either positive or negative, along with their probability:
 
 ```
 $ examples/nlp.py --model distilbert_sentiment
@@ -297,7 +296,7 @@ in Yosemite[B-LOC 0.987] National[I-LOC 0.988] Park[I-LOC 0.98] in California[B-
 
 Question/Answering (QA) works by supplying a context paragraph which the model then queries the best answer from.  The [`nlp_qa.py`](examples/nlp_qa.py) example allows you to select from several built-in context paragraphs (or supply your own) and to ask questions about these topics.  
 
-The QA model is flexible and doesn't need re-trained on different topics, as it was trained on the [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/) question/answering dataset which allows it to extract answers from a variety of contexts.  Essentially it learns to identify relevant information to your query from the context passage, as opposed to learning the knowledge of the content itself.
+The QA model is flexible and doesn't need re-trained on different topics, as it was trained on the [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/) question/answering dataset which allows it to extract answers from a variety of contexts.  It essentially learns to identify the information most relevant to your query from the context passage, as opposed to learning the content itself.
 
 ``` bash
 $ examples/nlp_qa.py 

@@ -102,6 +102,7 @@ RUN PYTHON_ROOT=`pip3 show transformers | grep Location: | cut -d' ' -f2` && \
 ## project install
 ################################################################
 COPY jetson_voice jetson_voice
+COPY examples examples
 COPY scripts scripts
 COPY tests tests
 

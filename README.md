@@ -26,7 +26,7 @@ dustynv/jetson-voice:r32.4.4    # JetPack 4.4.1 (L4T R32.4.4)
 dustynv/jetson-voice:r32.5.0    # JetPack 4.5 (L4T R32.5.0) / JetPack 4.5.1 (L4T R32.5.1)
 ```
 
-To install/run the container, you can simply clone this repo and use the `docker/run.sh` script (it will automatically pull the container)
+To download and run the container, you can simply clone this repo and use the `docker/run.sh` script:
 
 ``` bash
 $ git clone --branch dev https://github.com/dusty-nv/jetson-voice

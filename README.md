@@ -79,8 +79,8 @@ is it going to be
 is it going to be cloudy tomorrow.
 ```
 
-> This optimized model is then cached to disk, so the next time you run the model it will load faster.
 > The first time you run each model, TensorRT will take a few minutes to optimize it.  
+> This optimized model is then cached to disk, so the next time you run the model it will load faster.
 
 #### Live Microphone
 

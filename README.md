@@ -123,7 +123,7 @@ hey how are you guys.
 
 ## ASR Classification
 
-There are other ASR models included for command/keyword recognition ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) and voice activity detection ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing text.  
+There are other ASR models included for command/keyword recognition ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) and voice activity detection ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)).  These models are smaller and faster, and classify chunks of audio as opposed to transcribing text.  
 
 ### Command/Keyword Recognition
 

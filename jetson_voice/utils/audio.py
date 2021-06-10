@@ -3,6 +3,7 @@
 
 import os
 import math
+import pprint
 import logging
 import librosa
 import soundfile
@@ -45,9 +46,9 @@ def audio_to_int16(samples):
         return samples.astype(np.int16)
         
     
-def AudioStream(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
+def AudioInput(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
     """
-    Create an audio stream from wav file or microphone.
+    Create an audio input stream from wav file or microphone.
     Either the wav or mic argument needs to be specified.
     
     Parameters:
@@ -58,7 +59,7 @@ def AudioStream(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
         
     Returns AudioWavStream or AudioMicStream
     """
-    if mic is not None and mic >= 0:
+    if mic is not None and mic != '':
         return AudioMicStream(mic, sample_rate=sample_rate, chunk_size=chunk_size)
     elif wav is not None and wav != '':
         return AudioWavStream(wav, sample_rate=sample_rate, chunk_size=chunk_size)
@@ -66,64 +67,6 @@ def AudioStream(wav=None, mic=None, sample_rate=16000, chunk_size=16000):
         raise ValueError('either wav or mic argument must be specified')
  
  
-class AudioMicStream:
-    """
-    Live audio stream from microphone input device.
-    """
-    def __init__(self, device_id, sample_rate, chunk_size):
-        self.p = pa.PyAudio()
-        self.device_id = device_id
-        self.device_info = self.p.get_device_info_by_host_api_device_index(0, device_id)
-        self.sample_rate = sample_rate
-        self.chunk_size = chunk_size
-        self.stream = None
-        
-        print(self.device_info)
-    
-    def __del__(self):
-        self.close()
-        self.p.terminate()
-        
-    def open(self):
-        if self.stream is None:
-            self.stream = self.p.open(format=pa.paInt16,
-                            channels=1,
-                            rate=self.sample_rate,
-                            input=True,
-                            input_device_index=self.device_id,
-                            frames_per_buffer=self.chunk_size)
-     
-            print(f"\naudio stream opened on device {self.device_id} ({self.device_info['name']})")
-            print("you can begin speaking now...\n")
-            
-    def close(self):
-        if self.stream is not None:
-            self.stream.stop_stream()
-            self.stream.close()
-            self.stream = None
-       
-    def next(self):
-        if self.stream is None:
-            return None
-            
-        samples = self.stream.read(self.chunk_size, exception_on_overflow=False)
-        samples = np.frombuffer(samples, dtype=np.int16)
-        
-        return samples
-        
-    def __next__(self):
-        samples = self.next()
-        
-        if samples is None:
-            raise StopIteration
-        else:
-            return samples
-        
-    def __iter__(self):
-        self.open()
-        return self
-        
-
 class AudioWavStream:
     """
     Audio playback stream from .wav file
@@ -172,30 +115,186 @@ class AudioWavStream:
         return self
 
 
+class AudioMicStream:
+    """
+    Live audio stream from microphone input device.
+    """
+    def __init__(self, device, sample_rate, chunk_size):
+        self.stream = None
+        self.interface = pa.PyAudio()
+        self.device_info = find_audio_device(device, self.interface)
+        self.device_id = self.device_info['index']
+        self.sample_rate = sample_rate
+        self.chunk_size = chunk_size
+        
+        print('Audio Input Device:')
+        pprint.pprint(self.device_info)
+    
+    def __del__(self):
+        self.close()
+        self.interface.terminate()
+        
+    def open(self):
+        if self.stream:
+            return
+            
+        self.stream = self.interface.open(format=pa.paInt16,
+                        channels=1,
+                        rate=self.sample_rate,
+                        input=True,
+                        input_device_index=self.device_id,
+                        frames_per_buffer=self.chunk_size)
+ 
+        print(f"\naudio stream opened on device {self.device_id} ({self.device_info['name']})")
+        print("you can begin speaking now... (press Ctrl+C to exit)\n")
+            
+    def close(self):
+        if self.stream is not None:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.stream = None
+       
+    def next(self):
+        self.open()
+            
+        samples = self.stream.read(self.chunk_size, exception_on_overflow=False)
+        samples = np.frombuffer(samples, dtype=np.int16)
+        
+        return samples
+        
+    def __next__(self):
+        samples = self.next()
+        
+        if samples is None:
+            raise StopIteration
+        else:
+            return samples
+        
+    def __iter__(self):
+        self.open()
+        return self
+        
+
+class AudioOutput:
+    """
+    Audio output stream to a speaker.
+    """
+    def __init__(self, device, sample_rate, chunk_size=4096):
+        self.stream = None
+        self.interface = pa.PyAudio()
+        self.device_info = find_audio_device(device, self.interface)
+        self.device_id = self.device_info['index']
+        self.chunk_size = chunk_size
+        self.sample_rate = sample_rate
+        self.requested_rate = sample_rate
+        
+        print('Audio Output Device:')
+        pprint.pprint(self.device_info)
+        
+        self.open()
+    
+    def __del__(self):
+        self.close()
+        self.interface.terminate()
+        
+    def open(self):
+        if self.stream:
+            return
+            
+        try:
+            self.stream = self.interface.open(format=pa.paFloat32,
+                            channels=1, rate=self.sample_rate,
+                            frames_per_buffer=self.chunk_size,
+                            output=True, output_device_index=self.device_id)
+        except:
+            self.sample_rate = int(self.device_info['defaultSampleRate'])
+            logging.error(f"failed to open audio output device with sample_rate={self.requested_rate}, trying again with sample_rate={self.sample_rate}")
+            
+            self.stream = self.interface.open(format=pa.paFloat32,
+                            channels=1, rate=self.sample_rate,
+                            frames_per_buffer=self.chunk_size,
+                            output=True, output_device_index=self.device_id)
+        
+        logging.info(f"opened audio output device {self.device_id} ({self.device_info['name']})")
+        
+    def close(self):
+        if self.stream is not None:
+            self.stream.stop_stream()
+            self.stream.close()
+            self.stream = None
+       
+    def write(self, samples):
+        self.open()
+        samples = audio_to_float(samples)
+        
+        if self.requested_rate != self.sample_rate:
+            samples = librosa.resample(samples, self.requested_rate, self.sample_rate)
+            wav = soundfile.SoundFile('data/audio/resample_test.wav', mode='w', samplerate=self.sample_rate, channels=1)
+            wav.write(samples)
+            wav.close()
+            
+        self.stream.write(samples.tobytes())
+        
+        
 #
 # device enumeration
 # 
 _audio_device_info = None
 
-def _get_audio_devices():
+def _get_audio_devices(audio_interface=None):
     global _audio_device_info
     
     if _audio_device_info:
         return _audio_device_info
         
-    p = pa.PyAudio()
-    info = p.get_host_api_info_by_index(0)
+    if audio_interface:
+        interface = audio_interface
+    else:
+        interface = pa.PyAudio()
+        
+    info = interface.get_host_api_info_by_index(0)
     numDevices = info.get('deviceCount')
     
     _audio_device_info = []
     
     for i in range(0, numDevices):
-        _audio_device_info.append(p.get_device_info_by_host_api_device_index(0, i))
+        _audio_device_info.append(interface.get_device_info_by_host_api_device_index(0, i))
     
-    p.terminate()
+    if not audio_interface:
+        interface.terminate()
+        
     return _audio_device_info
+     
+     
+def find_audio_device(device, audio_interface=None):
+    """
+    Find an audio device by it's name or ID number.
+    """
+    devices = _get_audio_devices(audio_interface)
     
-    
+    try:
+        device_id = int(device)
+    except ValueError:
+        if not isinstance(device, str):
+            raise ValueError("expected either a string or an int for 'device' parameter")
+            
+        found = False
+        
+        for id, dev in enumerate(devices):
+            if device.lower() == dev['name'].lower():
+                device_id = id
+                found = True
+                break
+                
+        if not found:
+            raise ValueError(f"could not find audio device with name '{device}'")
+            
+    if device_id < 0 or device_id >= len(devices):
+        raise ValueError(f"invalid audio device ID ({device_id})")
+        
+    return devices[device_id]
+                
+   
 def list_audio_inputs():
     """
     Print out information about present audio input devices.
@@ -209,7 +308,7 @@ def list_audio_inputs():
         
     for i, dev_info in enumerate(devices):    
         if (dev_info.get('maxInputChannels')) > 0:
-            print("Input Device ID {:d} - {:s} (inputs={:.0f}) (sample_rate={:.0f})".format(i,
+            print("Input Device ID {:d} - '{:s}' (inputs={:.0f}) (sample_rate={:.0f})".format(i,
                   dev_info.get('name'), dev_info.get('maxInputChannels'), dev_info.get('defaultSampleRate')))
                  
     print('')
@@ -228,7 +327,7 @@ def list_audio_outputs():
         
     for i, dev_info in enumerate(devices):  
         if (dev_info.get('maxOutputChannels')) > 0:
-            print("Output Device ID {:d} - {:s} (outputs={:.0f}) (sample_rate={:.0f})".format(i,
+            print("Output Device ID {:d} - '{:s}' (outputs={:.0f}) (sample_rate={:.0f})".format(i,
                   dev_info.get('name'), dev_info.get('maxOutputChannels'), dev_info.get('defaultSampleRate')))
                   
     print('')

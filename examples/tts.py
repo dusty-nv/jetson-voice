@@ -6,16 +6,16 @@ import sys
 import time
 import readline
 
-from jetson_voice import TTS, ConfigArgParser, list_audio_devices
+from jetson_voice import TTS, ConfigArgParser, AudioOutput, list_audio_devices
 from soundfile import SoundFile
 
 
 parser = ConfigArgParser()
 
 parser.add_argument('--model', default='fastpitch_hifigan', type=str)
-parser.add_argument('--warmup', type=int, default=5, help='the number of warmup runs')
-parser.add_argument("--output-device", type=int, default=None, help='output audio device to use')
-parser.add_argument("--output-wav", type=str, default=None, help='output directory or wav file to write to')
+parser.add_argument('--warmup', default=5, type=int, help='the number of warmup runs')
+parser.add_argument("--output-device", default=None, type=str, help='output audio device to use')
+parser.add_argument("--output-wav", default=None, type=str, help='output directory or wav file to write to')
 parser.add_argument('--list-devices', action='store_true', help='list audio input devices')
 
 args = parser.parse_args()
@@ -24,17 +24,15 @@ print(args)
 # list audio devices
 if args.list_devices:
     list_audio_devices()
-  
+    sys.exit()
+    
 # load the model
 tts = TTS(args.model)
 
 # open output audio device
 if args.output_device:
-    audio_interface = pyaudio.PyAudio()
-    audio_device = p.open(output_device_index=args.output_device, 
-                          format=pyaudio.paFloat32, 
-                          channels=1, rate=tts.sample_rate, output=True)
-                  
+    audio_device = AudioOutput(args.output_device, tts.sample_rate)
+
 # create output wav directory
 if args.output_wav:
     wav_is_dir = len(os.path.splitext(args.output_wav)[1]) == 0
@@ -63,7 +61,7 @@ while True:
         
     # output the audio
     if args.output_device:
-        output_device.write(audio.tobytes())
+        audio_device.write(audio)
     
     if args.output_wav:
         wav_path = os.path.join(args.output_wav, f'{wav_count}.wav') if wav_is_dir else args.output_wav
@@ -72,9 +70,5 @@ while True:
         wav.close()
         wav_count += 1
         print(f"\nWrote audio to {wav_path}")
-    
-if args.output_device:
-    audio_device.close_stream()
-    audio_device.close()
 
     

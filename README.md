@@ -1,25 +1,21 @@
 # jetson-voice
 
-jetson-voice is an ASR/NLP/TTS deep learning inference library for Jetson Nano, TX1/TX2, Xavier NX, and AGX Xavier.  It supports Python and JetPack 4.4.1 or newer.
-
-The DNN models were trained with [NeMo](https://github.com/NVIDIA/NeMo) and deployed with [TensorRT](https://developer.nvidia.com/tensorrt) for optimized performance.  All computation is performed using the GPU onboard the device.
+jetson-voice is an ASR/NLP/TTS deep learning inference library for Jetson Nano, TX1/TX2, Xavier NX, and AGX Xavier.  It supports Python and JetPack 4.4.1 or newer.  The DNN models were trained with [NeMo](https://github.com/NVIDIA/NeMo) and deployed with [TensorRT](https://developer.nvidia.com/tensorrt) for optimized performance.  All computation is performed using the onboard GPU.
 
 Currently the following capabilities are included:
 
 * [Automatic Speech Recognition (ASR)](#asr)
-	* [Streaming ASR (QuartzNet) with CTC Beamsearch and language model](#asr) 
-	* Command/Keyword Recognition (MatchboxNet)
-	* Voice Activity Detection (VAD Marblenet)
-* Natural Language Processing (NLP)
-	* Joint Intent/Slot Classification
-	* Text Classification (Sentiment Analysis)
-	* Token Classification (Named Entity Recognition)
-	* Question/Answering (QA)
-* Text-to-Speech (TTS)
-	* Text-to-MEL Spectrogram (FastPitch)
-	* MEL-to-Audio vocoder (HiFiGAN)
+	* [Streaming ASR (QuartzNet)](#asr) 
+	* [Command/Keyword Recognition (MatchboxNet)](#asr-classification)
+	* [Voice Activity Detection (VAD Marblenet)](#asr-classification)
+* [Natural Language Processing (NLP)](#nlp)
+	* [Joint Intent/Slot Classification](#joint-intentslot-classification)
+	* [Text Classification (Sentiment Analysis)](#text-classification)
+	* [Token Classification (Named Entity Recognition)](#token-classification)
+	* [Question/Answering (QA)](#questionanswering)
+* [Text-to-Speech (TTS)](#tts)
 	
-The NLP models are using the DistilBERT architecture for reduced memory usage and increased performance.  For samples of the text-to-speech output, see the [TTS Audio samples](#tts-audio-samples) section below.
+The NLP models are using the DistilBERT transformer architecture for reduced memory usage and increased performance.  For samples of the text-to-speech output, see the [TTS Audio Samples](#tts-audio-samples) section below.
 
 ## Running the Container
 
@@ -38,27 +34,21 @@ $ cd jetson-voice
 $ docker/run.sh
 ```
 
-> **note**:  if you want to use a USB microphone device, plug it in *before* you start the container
+> **note**:  if you want to use a USB microphone or speaker, plug it in *before* you start the container
 
 There are some optional arguments to `docker/run.sh` that you can use:
 
 * `-r` (`--run`) specifies a run command, otherwise the container will start in an interactive shell.
-* `-v` (`--volume`) allows you to mount a directory from the host into the container (e.g. `/host/path:/container/path`)
+* `-v` (`--volume`) mount a directory from the host into the container (`/host/path:/container/path`)
 * `--dev` starts the container in development mode, where all the source files are mounted for easy editing
 
-The run script will automatically mount the `data/` directory into the container, which stores the models and other files.  So if you are saving audio files or other outputs from the container, if you save them under `data/` they will show up on the host.
+The run script will automatically mount the `data/` directory into the container, which stores the models and other data files.  If you save files from the container there, they will also show up under `data/` on the host.
 
-## Samples
+## ASR
 
-There are code samples included for ASR/NLP/TTS under the [`examples/`](examples/) directory.  Let's walk through running them.  
+The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a QuartzNet-15x5 model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see the [`examples/asr.py`](examples/asr.py)
 
-> **note**:  all commands below should be run inside the container
-
-### ASR
-
-The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a QuartzNet-15x5 model followed by a CTC beamsearch decoder and language model to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py).
-
-After you start the container, first run a test audio file (wav/ogg/flac) through [`examples/asr.py`] to verify that the system is functional:
+After you start the container, first run a test audio file (wav/ogg/flac) through [`examples/asr.py`](examples/asr.py) to verify that the system is functional.  Run this command (and all subsequent commands) inside the container:
 
 ``` bash
 $ examples/asr.py --wav data/audio/dusty.wav
@@ -89,11 +79,12 @@ is it going to be
 is it going to be cloudy tomorrow.
 ```
 
-> **note**:  the first time you run each model, TensorRT will take a few minutes to optimize it.  This optimized model is cached to disk for subsequent runs.
+> This optimized model is then cached to disk, so the next time you run the model it will load faster.
+> The first time you run each model, TensorRT will take a few minutes to optimize it.  
 
-#### Live Microphone
+### Live Microphone
 
-To test the ASR on a mic, first list the audio devices in your system to get the device ID's:
+To test the ASR on a mic, first list the audio devices in your system to get the audio device ID's:
 
 ``` bash
 $ scripts/list_audio_devices.sh
@@ -115,9 +106,8 @@ Input Device ID 11 - 'Logitech H570e Mono: USB Audio (hw:2,0)' (inputs=2) (sampl
 Input Device ID 12 - 'Samson Meteor Mic: USB Audio (hw:3,0)' (inputs=2) (sample_rate=44100)
 ```
 
-For example, I have some USB microphones connected that show up as device `11` and `12`.
-
-> **note**:  if you don't see your audio device listed, exit and restart the container.  USB devices should be attached *before* the container is started.
+> If you don't see your audio device listed, exit and restart the container.  
+> USB devices should be attached *before* the container is started.
 
 Then run the ASR example with the `--mic <DEVICE>` option, and specify either the device ID or name:
 
@@ -131,7 +121,7 @@ hey how are you guys.
 
 (Press Ctrl+C to exit)
 
-### ASR Classification
+## ASR Classification
 
 There are other ASR models included for command/keyword recognition (MatchboxNet) and voice activity detection (VAD MarbleNet).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing the text.  For example, the MatchboxNet model was trained on 12 keywords:
 
@@ -196,16 +186,16 @@ class 'background' (0.784)
 The numbers printed on the right are the classification probabilities between 0 and 1.
 
 
-### NLP
+## NLP
 
 There are two samples included for NLP:
 
 * [`examples/nlp.py`](examples/nlp.py) (intent/slot, text classification, token classification)
 * [`examples/nlp_qa.py`](examples/nlp_qa.py) (question/answering)
 
-These each use a DistilBERT model which has been fined-tuned for it's particular task.  For information about using the NLP APIs, please refer to [`jetson_voice/nlp.py`](jetson_voice/nlp.py)
+These each use a DistilBERT model which has been fined-tuned for it's particular task.  For information about using the NLP APIs, please refer to [`jetson_voice/nlp.py`](jetson_voice/nlp.py) and see the samples above.
 
-#### Joint Intent/Slot Classification
+### Joint Intent/Slot Classification
 
 Joint Intent and Slot classification is a task of classifying an Intent and detecting all relevant Slots (Entities) for this Intent in a query. For example, in the query: `What is the weather in Santa Clara tomorrow morning?`, we would like to classify the query as a `weather` Intent, and detect `Santa Clara` as a location slot and `tomorrow morning` as a date_time slot. 
 
@@ -250,7 +240,7 @@ Enter intent_slot query, or Q to quit:
            {'score': 0.21785143, 'slot': 'business_name', 'text': 'dominos'}]}
 ```
 
-#### Text Classification
+### Text Classification
 
 In this text classification example, we'll use the included sentiment analysis model that was trained on the [Standford Sentiment Treebank (SST-2)](https://nlp.stanford.edu/sentiment/index.html) dataset.  It will label queries as either positive or negative, along with their classification probability:
 
@@ -270,7 +260,7 @@ Enter text_classification query, or Q to quit:
 
 (class 0 is negative sentiment and class 1 is positive sentiment)
 
-#### Token Classification
+### Token Classification
 
 Whereas text classification classifies entire queries, token classification classifies individual tokens (or words).  In this example, we'll be performing Named Entity Recognition (NER), which is the task of detecting and classifying key information (entities) in text. For example, in a sentence: `Mary lives in Santa Clara and works at NVIDIA`, we should detect that `Mary` is a person, `Santa Clara` is a location and `NVIDIA` is a company.
 
@@ -297,9 +287,11 @@ Lisa's[B-PER 0.995] favorite place to climb in the summer[B-TIME 0.996] is El[B-
 in Yosemite[B-LOC 0.987] National[I-LOC 0.988] Park[I-LOC 0.98] in California[B-LOC 0.998], U.S[B-LOC 0.997].
 ```
 
-#### Question/Answering
+### Question/Answering
 
-Question/Answering (QA) works by supplying a context paragraph which the model then queries the best answer from.  The [`nlp_qa.py`](examples/nlp_qa.py) example allows you to select from several built-in context paragraphs (or supply your own) and to ask questions about these topics.  The model is flexible and doesn't need re-trained for different topics, as it was trained on the [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/) question/answering dataset which allows it to extract answers from a variety of contexts.  Essentially it learns to identify relevant information to your query from the context passage, as opposed to learning the knowledge of the content itself.
+Question/Answering (QA) works by supplying a context paragraph which the model then queries the best answer from.  The [`nlp_qa.py`](examples/nlp_qa.py) example allows you to select from several built-in context paragraphs (or supply your own) and to ask questions about these topics.  
+
+The QA model is flexible and doesn't need re-trained on different topics, as it was trained on the [SQuAD](https://rajpurkar.github.io/SQuAD-explorer/) question/answering dataset which allows it to extract answers from a variety of contexts.  Essentially it learns to identify relevant information to your query from the context passage, as opposed to learning the knowledge of the content itself.
 
 ``` bash
 $ examples/nlp_qa.py 
@@ -345,9 +337,9 @@ Answer: Neil Armstrong
 Score:  0.39105066657066345
 ```
 
-### TTS
+## TTS
 
-The text-to-speech service uses an ensemble of two models:  FastPitch to generate MEL spectrograms from text, and HiFiGAN as the vocoder (female English voice).  For information about using the TTS APIs, please refer to [`jetson_voice/tts.py`](jetson_voice/tts.py) 
+The text-to-speech service uses an ensemble of two models:  FastPitch to generate MEL spectrograms from text, and HiFiGAN as the vocoder (female English voice).  For information about using the TTS APIs, please refer to [`jetson_voice/tts.py`](jetson_voice/tts.py) and see [`examples/tts.py`](examples/tts.py).
 
 The [`examples/tts.py`](examples/tts.py) app can output the audio to a speaker, wav file, or sequence of wav files.  Run it with `--list-devices` to get a list of your audio devices.
 
@@ -378,10 +370,10 @@ Run 5 -- Time to first audio: 0.126s. Generated 2.73s of audio. RTFx=21.61.
 Wrote audio to data/audio/tts_test/1.wav
 ```
 
-#### TTS audio samples
+#### TTS Audio Samples
 
-* [Weather forecast WAV](data/audio/tts_examples/0.wav)
-* [Sally sells seashells](data/audio/tts_examples/1.wav)
+* [Weather forecast](data/audio/tts_examples/0.wav) (wav)
+* [Sally sells seashells](data/audio/tts_examples/1.wav) (wav)
 
 
 ## Tests

@@ -6,8 +6,8 @@ Currently the following capabilities are included:
 
 * [Automatic Speech Recognition (ASR)](#asr)
 	* [Streaming ASR (QuartzNet)](#asr) 
-	* [Command/Keyword Recognition (MatchboxNet)](#asr-classification)
-	* [Voice Activity Detection (VAD Marblenet)](#asr-classification)
+	* [Command/Keyword Recognition (MatchboxNet)](#commandkeyword-recognition)
+	* [Voice Activity Detection (VAD Marblenet)](#voice-activity-detection-vad)
 * [Natural Language Processing (NLP)](#nlp)
 	* [Joint Intent/Slot Classification](#joint-intentslot-classification)
 	* [Text Classification (Sentiment Analysis)](#text-classification)
@@ -15,7 +15,7 @@ Currently the following capabilities are included:
 	* [Question/Answering (QA)](#questionanswering)
 * [Text-to-Speech (TTS)](#tts)
 	
-The NLP models are using the DistilBERT transformer architecture for reduced memory usage and increased performance.  For samples of the text-to-speech output, see the [TTS Audio Samples](#tts-audio-samples) section below.
+The NLP models are using the [DistilBERT](https://arxiv.org/abs/1910.01108) transformer architecture for reduced memory usage and increased performance.  For samples of the text-to-speech output, see the [TTS Audio Samples](#tts-audio-samples) section below.
 
 ## Running the Container
 
@@ -46,7 +46,7 @@ The run script will automatically mount the `data/` directory into the container
 
 ## ASR
 
-The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a QuartzNet-15x5 model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see the [`examples/asr.py`](examples/asr.py)
+The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a [QuartzNet-15x5](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/models.html#quartznet) model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see the [`examples/asr.py`](examples/asr.py)
 
 After you start the container, first run a test audio file (wav/ogg/flac) through [`examples/asr.py`](examples/asr.py) to verify that the system is functional.  Run this command (and all subsequent commands) inside the container:
 
@@ -117,13 +117,17 @@ $ examples/asr.py --mic 11
 hey
 hey how are you guys
 hey how are you guys.
-```
 
-(Press Ctrl+C to exit)
+# (Press Ctrl+C to exit)
+```
 
 ## ASR Classification
 
-There are other ASR models included for command/keyword recognition (MatchboxNet) and voice activity detection (VAD MarbleNet).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing the text.  For example, the MatchboxNet model was trained on 12 keywords:
+There are other ASR models included for command/keyword recognition ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) and voice activity detection ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad)).  These models are smaller and faster, and classify the audio in chunks as opposed to transcribing the text.  
+
+### Command/Keyword Recognition
+
+The ([MatchboxNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#matchboxnet-speech-commands)) model was trained on 12 keywords:
 
 ```
 # MatchboxNet classes
@@ -163,7 +167,9 @@ class 'silence' (0.639)
 class 'silence' (0.576)
 ```
 
-The voice activity model (vad_marblenet) simply outputs `background` or `speech`:
+### Voice Activity Detection (VAD)
+
+The voice activity model ([VAD MarbleNet](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/speech_classification/models.html#marblenet-vad))) is a binary model that outputs `background` or `speech`:
 
 ``` bash
 $ examples/asr.py --model vad_marblenet --wav data/audio/commands.wav

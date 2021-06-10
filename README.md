@@ -302,7 +302,10 @@ The QA model is flexible and doesn't need re-trained on different topics, as it 
 $ examples/nlp_qa.py 
 
 Context:
-The Amazon rainforest is a moist broadleaf forest that covers most of the Amazon basin of South America. This basin encompasses 7,000,000 square kilometres (2,700,000 sq mi), of which 5,500,000 square kilometres (2,100,000 sq mi) are covered by the rainforest. The majority of the forest is contained within Brazil, with 60% of the rainforest, followed by Peru with 13%, and Colombia with 10%.
+The Amazon rainforest is a moist broadleaf forest that covers most of the Amazon basin of South America. 
+This basin encompasses 7,000,000 square kilometres (2,700,000 sq mi), of which 5,500,000 square kilometres 
+(2,100,000 sq mi) are covered by the rainforest. The majority of the forest is contained within Brazil, 
+with 60% of the rainforest, followed by Peru with 13%, and Colombia with 10%.
 
 Enter a question, C to change context, P to print context, or Q to quit:
 
@@ -332,7 +335,9 @@ Select from one of the following topics, or enter your own context paragraph:
 > 3
 
 Context:
-The first manned Moon landing was Apollo 11 on July, 20 1969. The first human to step on the Moon was astronaut Neil Armstrong followed second by Buzz Aldrin. They landed in the Sea of Tranquility with their lunar module the Eagle. They were on the lunar surface for 2.25 hours and collected 50 pounds of moon rocks.
+The first manned Moon landing was Apollo 11 on July, 20 1969. The first human to step on the Moon was 
+astronaut Neil Armstrong followed second by Buzz Aldrin. They landed in the Sea of Tranquility with their 
+lunar module the Eagle. They were on the lunar surface for 2.25 hours and collected 50 pounds of moon rocks.
 
 Enter a question, C to change context, P to print context, or Q to quit:
 

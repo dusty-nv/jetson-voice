@@ -7,7 +7,7 @@ import json
 import nltk
 import logging
 
-from jetson_voice import ASR, AudioStream, ConfigArgParser
+from jetson_voice import ASR, AudioInput, ConfigArgParser
 
 
 parser = ConfigArgParser()
@@ -41,7 +41,7 @@ test_results = []
 
 # run tests
 for test in test_config:
-    stream = AudioStream(wav=test['wav'], 
+    stream = AudioInput(wav=test['wav'], 
                          sample_rate=asr.sample_rate, 
                          chunk_size=asr.chunk_size)
 

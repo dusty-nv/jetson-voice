@@ -3,6 +3,7 @@
 
 import os
 import math
+import logging
 import librosa
 import soundfile
 
@@ -26,6 +27,9 @@ def audio_to_float(samples):
     """
     Convert audio samples to 32-bit float in the range [-1,1]
     """
+    if samples.dtype == np.float32:
+        return samples
+        
     return samples.astype(np.float32) / 32768
   
 
@@ -128,53 +132,32 @@ class AudioWavStream:
         self.filename = filename
         self.chunk_size = chunk_size
         self.sample_rate = sample_rate
-        self.sf = None
+                
+        if not os.path.isfile(filename):
+            raise IOError(f'could not find file {filename}')
+            
+        logging.info(f"loading audio '{filename}'")
         
-        if not os.path.isfile(self.filename):
-            raise IOError(f'could not find file {self.filename}')
-        
-    def __del__(self):
-        self.close()
-        
+        self.samples, _ = librosa.load(filename, sr=sample_rate, mono=True)
+        self.position = 0
+
     def open(self):
-        if self.sf is not None:
-            return
-
-        self.sf = soundfile.SoundFile(self.filename, 'rb')
+        pass
         
-        print(self.sf)
-        print('  - length', self.sf.frames)
-        print('  - format_info', self.sf.format_info)
-        print('  - sample_rate', self.sf.samplerate)
-        
-        if self.sf.samplerate != self.sample_rate:
-            raise ValueError(f"'{self.filename}' has a sample rate of {self.sf.samplerate}, but needed {self.sample_rate}")
-            
-        dtype_options = {'PCM_16': 'int16', 'PCM_32': 'int32', 'FLOAT': 'float32'}
-        dtype_file = self.sf.subtype
-        
-        if dtype_file in dtype_options:
-            self.dtype = dtype_options[dtype_file]
-        else:
-            self.dtype = 'float32'
-            
     def close(self):
-        if self.sf is not None:
-            self.sf.close()
-            self.sf = None
-    
+        pass
+        
     def next(self):
-        if self.sf is None:
+        if self.position >= len(self.samples):
             return None
+        
+        chunk = self.samples[self.position : min(self.position + self.chunk_size, len(self.samples))]
+        
+        if len(chunk) < self.chunk_size:
+            chunk = np.pad(chunk, (0, self.chunk_size-len(chunk)), mode='constant')
             
-        samples = self.sf.read(self.chunk_size, dtype=self.dtype)
-
-        # pad to chunk size
-        if len(samples) < self.chunk_size:
-            samples = np.pad(samples, (0, self.chunk_size-len(samples)), mode='constant')
-            self.close()
-
-        return samples
+        self.position += self.chunk_size
+        return chunk
         
     def __next__(self):
         samples = self.next()
@@ -185,7 +168,7 @@ class AudioWavStream:
             return samples
         
     def __iter__(self):
-        self.open()
+        self.position = 0
         return self
 
 

@@ -2,7 +2,7 @@
 # coding: utf-8
 
 from .utils import (
-    find_resource, global_config, ConfigDict, ConfigArgParser,
+    find_resource, list_models, global_config, ConfigDict, ConfigArgParser,
     list_audio_devices, list_audio_inputs, list_audio_outputs, AudioInput, AudioOutput 
 )
 

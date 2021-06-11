@@ -7,7 +7,7 @@ import numpy as np
 from jetson_voice.utils import global_config
 
 
-def transcript_from_words(words, scores=False, times=False, end=False):
+def transcript_from_words(words, scores=False, times=False, end=False, add_punctuation=True):
     """
     Convert a list of words to the text transcript.
     """
@@ -27,7 +27,7 @@ def transcript_from_words(words, scores=False, times=False, end=False):
         if idx < len(words) - 1:
             transcript += ' '
       
-    if end:
+    if end and add_punctuation:
         transcript += '.'  # add punctuation to end
       
     return transcript

@@ -135,7 +135,7 @@ class CTCBeamSearchDecoder(CTCDecoder):
             transcripts = [(self.words, False)]
 
         return [{
-            'text' : transcript_from_words(words, scores=global_config.debug, times=global_config.debug, end=end),
+            'text' : transcript_from_words(words, scores=global_config.debug, times=global_config.debug, end=end, add_punctuation=self.config['add_punctuation']),
             'words' : words,
             'end' : end
         } for words, end in transcripts]

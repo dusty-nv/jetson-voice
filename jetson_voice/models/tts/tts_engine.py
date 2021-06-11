@@ -40,7 +40,7 @@ class TTSEngine(TTSService):
         dynamic_shapes = {
             'min' : (1, features, 1),
             'opt' : (1, features, 160), # ~5-6 words
-            'max' : (1, features, 512)  # ~15-20 words?
+            'max' : (1, features, 1024) # ~20-30 words?
         }
         
         self.vocoder = load_model(self.config.vocoder, dynamic_shapes=dynamic_shapes)

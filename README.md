@@ -4,16 +4,16 @@ jetson-voice is an ASR/NLP/TTS deep learning inference library for Jetson Nano, 
 
 Currently the following capabilities are included:
 
-* [Automatic Speech Recognition (ASR)](#asr)
-	* [Streaming ASR (QuartzNet)](#asr) 
+* [Automatic Speech Recognition (ASR)](#automatic-speech-recognition-asr)
+	* [Streaming ASR (QuartzNet)](#automatic-speech-recognition-asr) 
 	* [Command/Keyword Recognition (MatchboxNet)](#commandkeyword-recognition)
 	* [Voice Activity Detection (VAD Marblenet)](#voice-activity-detection-vad)
-* [Natural Language Processing (NLP)](#nlp)
+* [Natural Language Processing (NLP)](#natural-language-processing-nlp)
 	* [Joint Intent/Slot Classification](#joint-intentslot-classification)
 	* [Text Classification (Sentiment Analysis)](#text-classification)
 	* [Token Classification (Named Entity Recognition)](#token-classification)
 	* [Question/Answering (QA)](#questionanswering)
-* [Text-to-Speech (TTS)](#tts)
+* [Text-to-Speech (TTS)](#text-to-speech-tts)
 	
 The NLP models are using the [DistilBERT](https://arxiv.org/abs/1910.01108) transformer architecture for reduced memory usage and increased performance.  For samples of the text-to-speech output, see the [TTS Audio Samples](#tts-audio-samples) section below.
 
@@ -44,7 +44,7 @@ There are some optional arguments to `docker/run.sh` that you can use:
 
 The run script will automatically mount the `data/` directory into the container, which stores the models and other data files.  If you save files from the container there, they will also show up under `data/` on the host.
 
-## ASR
+## Automatic Speech Recognition (ASR)
 
 The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a [QuartzNet-15x5](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/models.html#quartznet) model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see the [`examples/asr.py`](examples/asr.py)
 
@@ -191,7 +191,7 @@ class 'background' (0.988)
 class 'background' (0.784)
 ```
 
-## NLP
+## Natural Language Processing (NLP)
 
 There are two samples included for NLP:
 
@@ -347,7 +347,7 @@ Answer: Neil Armstrong
 Score:  0.39105066657066345
 ```
 
-## TTS
+## Text-to-Speech (TTS)
 
 The text-to-speech service uses an ensemble of two models:  FastPitch to generate MEL spectrograms from text, and HiFiGAN as the vocoder (female English voice).  For information about using the TTS APIs, please refer to [`jetson_voice/tts.py`](jetson_voice/tts.py) and see [`examples/tts.py`](examples/tts.py).
 

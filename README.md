@@ -236,13 +236,20 @@ Enter intent_slot query, or Q to quit:
  'score': 0.37434494,
  'slots': [{'score': 0.5732627, 'slot': 'date', 'text': 'tomorrow'}]}
 
-> order a pepperoni pizza from domino's
+> Order a pepperoni pizza from domino's
 
 {'intent': 'takeaway_order',
  'score': 0.50629586,
  'slots': [{'score': 0.27558547, 'slot': 'food_type', 'text': 'pepperoni'},
            {'score': 0.2778827, 'slot': 'food_type', 'text': 'pizza'},
            {'score': 0.21785143, 'slot': 'business_name', 'text': 'dominos'}]}
+	
+> Where's the closest Starbucks?
+
+{'intent': 'recommendation_locations',
+ 'score': 0.5438984,
+ 'slots': [{'score': 0.1604197, 'slot': 'place_name', 'text': 'Starbucks'}]}
+
 ```
 
 ### Text Classification

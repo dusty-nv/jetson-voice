@@ -9,7 +9,7 @@ from .utils import (
 from .asr import ASR, ASRService
 from .tts import TTS, TTSService
 
-from .nlp import (
+from .nlp import (NLP,
     IntentSlot, IntentSlotService, 
     QuestionAnswer, QuestionAnswerService,
     TextClassification, TextClassificationService,

@@ -8,7 +8,7 @@ import nltk
 import pprint
 import logging
 
-from jetson_voice import AutoModel, ConfigArgParser
+from jetson_voice import NLP, ConfigArgParser
 
 
 parser = ConfigArgParser()
@@ -34,7 +34,7 @@ with open(args.config) as config_file:
     test_config = json.load(config_file)
 
 # load the model
-model = AutoModel(args.model, domain='nlp')
+model = NLP(args.model)
 type = model.config.type
 
 """

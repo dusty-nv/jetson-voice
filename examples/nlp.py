@@ -5,7 +5,7 @@ import sys
 import pprint
 import readline
 
-from jetson_voice import AutoModel, ConfigArgParser
+from jetson_voice import NLP, ConfigArgParser
 
 
 parser = ConfigArgParser()
@@ -14,7 +14,7 @@ args = parser.parse_args()
 print(args)
 
 # load the model
-model = AutoModel(args.model, domain='nlp')
+model = NLP(args.model)
 
 # QA models should run the nlp_qa.py example
 type = model.config.type

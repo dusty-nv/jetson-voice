@@ -4,6 +4,20 @@
 from jetson_voice.utils import load_resource
 
 
+def NLP(resource, *args, **kwargs):
+    """
+    Factory for automatically loading NLP models or services.
+    
+    Returns an instance of:
+        - IntentSlotService
+        - QuestionAnswerService
+        - TextClassificationService
+        - TokenClassificationService
+    """
+    from jetson_voice.auto import AutoModel
+    return AutoModel(resource, domain='nlp', *args, **kwargs)
+    
+    
 def IntentSlot(resource, *args, **kwargs):
     """
     Loads a NLP joint intent/slot classifier service or model.

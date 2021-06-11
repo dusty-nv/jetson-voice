@@ -181,6 +181,12 @@ class AudioOutput:
     """
     def __init__(self, device, sample_rate, chunk_size=4096):
         self.stream = None
+        
+        if device is None:
+            self.device_id = None
+            logging.warning(f"creating pass-through audio output without a device")
+            return
+            
         self.interface = pa.PyAudio()
         self.device_info = find_audio_device(device, self.interface)
         self.device_id = self.device_info['index']
@@ -194,11 +200,14 @@ class AudioOutput:
         self.open()
     
     def __del__(self):
+        if self.device_id is None:
+            return
+            
         self.close()
         self.interface.terminate()
         
     def open(self):
-        if self.stream:
+        if self.stream or self.device_id is None:
             return
             
         try:
@@ -224,6 +233,9 @@ class AudioOutput:
             self.stream = None
        
     def write(self, samples):
+        if self.device_id is None:
+            return
+            
         self.open()
         samples = audio_to_float(samples)
         

@@ -46,7 +46,7 @@ The run script will automatically mount the `data/` directory into the container
 
 ## Automatic Speech Recognition (ASR)
 
-The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a [QuartzNet-15x5](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/models.html#quartznet) model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see the [`examples/asr.py`](examples/asr.py)
+The speech recognition in jetson-voice is a streaming service, so it's intended to be used on live sources and transcribes the audio in 1-second chunks.  It uses a [QuartzNet-15x5](https://docs.nvidia.com/deeplearning/nemo/user-guide/docs/en/stable/asr/models.html#quartznet) model followed by a CTC beamsearch decoder and language model, to further refine the raw output of the network.  It detects breaks in the audio to determine the end of sentences.  For information about using the ASR APIs, please refer to [`jetson_voice/asr.py`](jetson_voice/asr.py) and see [`examples/asr.py`](examples/asr.py)
 
 After you start the container, first run a test audio file (wav/ogg/flac) through [`examples/asr.py`](examples/asr.py) to verify that the system is functional.  Run this command (and all subsequent commands) inside the container:
 
@@ -349,7 +349,7 @@ Score:  0.39105066657066345
 
 ## Text-to-Speech (TTS)
 
-The text-to-speech service uses an ensemble of two models:  FastPitch to generate MEL spectrograms from text, and HiFiGAN as the vocoder (female English voice).  For information about using the TTS APIs, please refer to [`jetson_voice/tts.py`](jetson_voice/tts.py) and see [`examples/tts.py`](examples/tts.py).
+The text-to-speech service uses an ensemble of two models:  FastPitch to generate MEL spectrograms from text, and HiFiGAN as the vocoder (female English voice).  For information about using the TTS APIs, please refer to [`jetson_voice/tts.py`](jetson_voice/tts.py) and see [`examples/tts.py`](examples/tts.py)
 
 The [`examples/tts.py`](examples/tts.py) app can output the audio to a speaker, wav file, or sequence of wav files.  Run it with `--list-devices` to get a list of your audio devices.
 

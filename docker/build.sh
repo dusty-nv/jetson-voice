@@ -41,7 +41,7 @@ sudo docker build -t $VOICE_CONTAINER -f Dockerfile.$ARCH \
 		.
 
 # build ROS version of container
-if [[ "$ROS_PYTORCH" != "none" ]] ; then
+if [[ "$ROS_DISTRO" != "none" ]] ; then
 	ROS_CONTAINER="$VOICE_CONTAINER-ros-$ROS_DISTRO"
 	ROS_CONTAINER_BASE="$ROS_CONTAINER-base"
 	

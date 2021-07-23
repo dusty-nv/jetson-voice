@@ -1,17 +1,25 @@
 #!/usr/bin/env bash
 
+ROS_DISTRO=${1:-"foxy"}
 source docker/tag.sh
 
 # push image
 push() 
 {
-	sudo docker rmi $CONTAINER_REMOTE_IMAGE
-	sudo docker tag $1 $CONTAINER_REMOTE_IMAGE
+	local remote_image="dustynv/$1"
 	
-	echo "pushing image $CONTAINER_REMOTE_IMAGE"
-	sudo docker push $CONTAINER_REMOTE_IMAGE
-	echo "done pushing image $CONTAINER_REMOTE_IMAGE"
+	sudo docker rmi $remote_image
+	sudo docker tag $1 $remote_image
+	
+	echo "pushing image $remote_image"
+	sudo docker push $remote_image
+	echo "done pushing image $remote_image"
 }
 
 push "$CONTAINER_NAME:$TAG"
 
+ROS_CONTAINER="$CONTAINER_NAME:$TAG-ros-$ROS_DISTRO"
+ROS_CONTAINER_BASE="$ROS_CONTAINER-base"
+
+push "$ROS_CONTAINER_BASE"
+push "$ROS_CONTAINER"

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-BASE_IMAGE=$1
+ROS_DISTRO=${1:-"none"}
+BASE_IMAGE=$2
 NEMO_VERSION="1.0.0rc1"
 
 # find container tag from os version
@@ -28,12 +29,44 @@ elif [ $ARCH = "x86_64" ]; then
 	BASE_IMAGE=${BASE_IMAGE:-"nvcr.io/nvidia/nemo:$NEMO_VERSION"}
 fi
 
+VOICE_CONTAINER="$CONTAINER_NAME:$TAG"
+
+echo "CONTAINER=$VOICE_CONTAINER"
 echo "BASE_IMAGE=$BASE_IMAGE"
-echo "CONTAINER=$CONTAINER_NAME:$TAG"
 
 # build the container
-sudo docker build -t $CONTAINER_NAME:$TAG -f Dockerfile.$ARCH \
+sudo docker build -t $VOICE_CONTAINER -f Dockerfile.$ARCH \
           --build-arg BASE_IMAGE=$BASE_IMAGE \
 		--build-arg NEMO_VERSION=$NEMO_VERSION \
 		.
 
+# build ROS version of container
+if [[ "$ROS_PYTORCH" != "none" ]] ; then
+	ROS_CONTAINER="$VOICE_CONTAINER-ros-$ROS_DISTRO"
+	ROS_CONTAINER_BASE="$ROS_CONTAINER-base"
+	
+	# copy files needed to build ROS container
+	if [ ! -d "packages/" ]; then
+		cp -r docker/containers/packages packages
+	fi
+	
+	# opencv.csv mounts files that preclude us installing different version of opencv
+	# temporarily disable the opencv.csv mounts while we build the container
+	CV_CSV="/etc/nvidia-container-runtime/host-files-for-container.d/opencv.csv"
+
+	if [ -f "$CV_CSV" ]; then
+		sudo mv $CV_CSV $CV_CSV.backup
+	fi
+	
+	echo "CONTAINER=$ROS_CONTAINER_BASE"
+	echo "BASE_IMAGE=$VOICE_CONTAINER"
+
+	sudo docker build -t $ROS_CONTAINER_BASE -f docker/containers/Dockerfile.ros.$ROS_DISTRO \
+          --build-arg BASE_IMAGE=$VOICE_CONTAINER \
+		.
+	
+	# restore opencv.csv mounts
+	if [ -f "$CV_CSV.backup" ]; then
+		sudo mv $CV_CSV.backup $CV_CSV
+	fi
+fi

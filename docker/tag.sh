@@ -17,11 +17,5 @@ else
 fi
 
 CONTAINER_NAME="jetson-voice"
-CONTAINER_IMAGE="$CONTAINER_NAME:$TAG"
-CONTAINER_REMOTE_IMAGE="dustynv/$CONTAINER_IMAGE"
 
-# check for local image
-if [[ "$(sudo docker images -q $CONTAINER_IMAGE 2> /dev/null)" == "" ]]; then
-	CONTAINER_IMAGE=$CONTAINER_REMOTE_IMAGE
-fi
 

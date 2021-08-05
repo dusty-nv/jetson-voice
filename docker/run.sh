@@ -24,6 +24,10 @@ show_help() {
     echo "   -c, --container DOCKER_IMAGE Specifies the name of the Docker container"
     echo "                                image to use (default: 'jetson-voice')"
     echo " "
+    echo "   --ros ROS_DISTRO Starts the version of the container using the"
+    echo "                    specified ROS distro (or foxy if not specified)"
+    echo "                    This is overridden by the --container argument"
+    echo " "
     echo "   -d, --dev  Runs the container in development mode, where the source"
     echo "              files are mounted into the container dynamically, so they"
     echo "              can more easily be edited from the host machine."
@@ -83,6 +87,20 @@ while :; do
         --container=)         # Handle the case of an empty --image=
             die 'ERROR: "--container" requires a non-empty option argument.'
             ;;
+	   --ros)
+            if [ "$2" ]; then
+                ROS_DISTRO=$2
+                shift
+            else
+                ROS_DISTRO="foxy"
+            fi
+            ;;
+        --ros=?*)
+            ROS_DISTRO=${1#*=} # Delete everything up to "=" and assign the remainder.
+            ;;
+        --ros=)         # Handle the case of an empty --image=
+            ROS_DISTRO="foxy"
+            ;;
 	   -d|--dev)
             DEV_VOLUME="--volume $PWD/jetson_voice:$DOCKER_ROOT/jetson_voice --volume $PWD/examples:$DOCKER_ROOT/examples --volume $PWD/scripts:$DOCKER_ROOT/scripts --volume $PWD/tests:$DOCKER_ROOT/tests"
             ;;
@@ -122,6 +140,22 @@ while :; do
     shift
 done
 
+# select the container, unless --container was explicitly specified
+if [ -z "$CONTAINER_IMAGE" ]; then
+	CONTAINER_IMAGE="$CONTAINER_NAME:$TAG"
+
+	if [ -n "$ROS_DISTRO" ]; then
+		CONTAINER_IMAGE="$CONTAINER_NAME:$TAG-ros-$ROS_DISTRO"
+	fi
+
+	CONTAINER_REMOTE_IMAGE="dustynv/$CONTAINER_IMAGE"
+
+	# check for local image
+	if [[ "$(sudo docker images -q $CONTAINER_IMAGE 2> /dev/null)" == "" ]]; then
+		CONTAINER_IMAGE=$CONTAINER_REMOTE_IMAGE
+	fi
+fi
+
 echo "CONTAINER:     $CONTAINER_IMAGE"
 echo "DEV_VOLUME:    $DEV_VOLUME"
 echo "DATA_VOLUME:   $DATA_VOLUME"
@@ -139,12 +173,16 @@ $USER_VOLUME"
 
 if [ $ARCH = "aarch64" ]; then
 
-	sudo docker run --runtime nvidia -it --rm --network host \
-	    $MOUNTS $CONTAINER_IMAGE $USER_COMMAND
+	sudo docker run --runtime nvidia -it --rm \
+		--name=$CONTAINER_NAME \
+		--network host \
+		$MOUNTS $CONTAINER_IMAGE $USER_COMMAND
 	    
 elif [ $ARCH = "x86_64" ]; then
 
-	sudo docker run --gpus all -it --rm --network=host \
+	sudo docker run --gpus all -it --rm \
+		--name=$CONTAINER_NAME \
+		--network=host \
 		--shm-size=8g \
 		--ulimit memlock=-1 \
 		--ulimit stack=67108864 \

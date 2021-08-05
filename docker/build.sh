@@ -41,7 +41,7 @@ sudo docker build -t $VOICE_CONTAINER -f Dockerfile.$ARCH \
 		.
 
 # build ROS version of container
-if [[ "$ROS_DISTRO" != "none" ]] ; then
+if [[ "$ROS_DISTRO" != "none" ]] && [[ $ARCH = "aarch64" ]]; then
 	ROS_CONTAINER="$VOICE_CONTAINER-ros-$ROS_DISTRO"
 	ROS_CONTAINER_BASE="$ROS_CONTAINER-base"
 	
@@ -58,6 +58,7 @@ if [[ "$ROS_DISTRO" != "none" ]] ; then
 		sudo mv $CV_CSV $CV_CSV.backup
 	fi
 	
+	# build ROS on top of jetson-voice 
 	echo "CONTAINER=$ROS_CONTAINER_BASE"
 	echo "BASE_IMAGE=$VOICE_CONTAINER"
 
@@ -65,6 +66,14 @@ if [[ "$ROS_DISTRO" != "none" ]] ; then
           --build-arg BASE_IMAGE=$VOICE_CONTAINER \
 		.
 	
+	# install jetson_voice_ros package
+	echo "CONTAINER=$ROS_CONTAINER"
+	echo "BASE_IMAGE=$ROS_CONTAINER_BASE"
+
+	sudo docker build -t $ROS_CONTAINER -f Dockerfile.ros \
+          --build-arg BASE_IMAGE=$ROS_CONTAINER_BASE \
+		.
+		
 	# restore opencv.csv mounts
 	if [ -f "$CV_CSV.backup" ]; then
 		sudo mv $CV_CSV.backup $CV_CSV

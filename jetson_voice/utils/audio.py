@@ -241,9 +241,9 @@ class AudioOutput:
         
         if self.requested_rate != self.sample_rate:
             samples = librosa.resample(samples, self.requested_rate, self.sample_rate)
-            wav = soundfile.SoundFile('data/audio/resample_test.wav', mode='w', samplerate=self.sample_rate, channels=1)
-            wav.write(samples)
-            wav.close()
+            #wav = soundfile.SoundFile('data/audio/resample_test.wav', mode='w', samplerate=self.sample_rate, channels=1)
+            #wav.write(samples)
+            #wav.close()
             
         self.stream.write(samples.tobytes())
         

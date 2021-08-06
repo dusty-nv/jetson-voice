@@ -30,14 +30,23 @@ elif [ $ARCH = "x86_64" ]; then
 fi
 
 VOICE_CONTAINER="$CONTAINER_NAME:$TAG"
+VOICE_CONTAINER_BASE="$VOICE_CONTAINER-base"
 
-echo "CONTAINER=$VOICE_CONTAINER"
+# build the base container
+echo "CONTAINER=$VOICE_CONTAINER_BASE"
 echo "BASE_IMAGE=$BASE_IMAGE"
 
-# build the container
-sudo docker build -t $VOICE_CONTAINER -f Dockerfile.$ARCH \
+sudo docker build -t $VOICE_CONTAINER_BASE -f Dockerfile.$ARCH \
           --build-arg BASE_IMAGE=$BASE_IMAGE \
 		--build-arg NEMO_VERSION=$NEMO_VERSION \
+		.
+		
+# build the runtime container
+echo "CONTAINER=$VOICE_CONTAINER"
+echo "BASE_IMAGE=$VOICE_CONTAINER_BASE"
+
+sudo docker build -t $VOICE_CONTAINER -f Dockerfile.runtime \
+          --build-arg BASE_IMAGE=$VOICE_CONTAINER_BASE \
 		.
 
 # build ROS version of container
@@ -60,10 +69,10 @@ if [[ "$ROS_DISTRO" != "none" ]] && [[ $ARCH = "aarch64" ]]; then
 	
 	# build ROS on top of jetson-voice 
 	echo "CONTAINER=$ROS_CONTAINER_BASE"
-	echo "BASE_IMAGE=$VOICE_CONTAINER"
+	echo "BASE_IMAGE=$VOICE_CONTAINER_BASE"
 
 	sudo docker build -t $ROS_CONTAINER_BASE -f docker/containers/Dockerfile.ros.$ROS_DISTRO \
-          --build-arg BASE_IMAGE=$VOICE_CONTAINER \
+          --build-arg BASE_IMAGE=$VOICE_CONTAINER_BASE \
 		.
 	
 	# install jetson_voice_ros package

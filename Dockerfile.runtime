@@ -18,30 +18,11 @@
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
 
-ARG BASE_IMAGE=jetson-voice:r32.5.0-foxy-base
+ARG BASE_IMAGE=jetson-voice:r32.5.0-base
 FROM ${BASE_IMAGE}
 
-
-################################################################
-## install jetson_voice_ros package
-################################################################
-COPY ros /tmp/jetson_voice_ros
-    
-RUN source ${ROS_ROOT}/install/setup.bash && \
-    mkdir -p ${ROS_ROOT}/src && \
-    cd ${ROS_ROOT} && \
-    cp -r /tmp/jetson_voice_ros src && \
-    
-    # build the package
-    colcon build \
-        --merge-install \
-	    --base-paths src/jetson_voice_ros \
-        --event-handlers console_direct+ && \
-	  
-    # clean-up build files
-    rm -rf ${ROS_ROOT}/src && \
-    rm -rf ${ROS_ROOT}/logs && \
-    rm -rf ${ROS_ROOT}/build
+ARG WORKSPACE=/jetson-voice
+WORKDIR ${WORKSPACE}
 
 
 ################################################################

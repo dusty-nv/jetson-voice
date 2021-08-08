@@ -90,6 +90,9 @@ class AudioWavStream:
     def close(self):
         pass
         
+    def reset(self):
+        self.position = 0
+        
     def next(self):
         if self.position >= len(self.samples):
             return None
@@ -153,7 +156,11 @@ class AudioMicStream:
             self.stream.stop_stream()
             self.stream.close()
             self.stream = None
-       
+     
+    def reset(self):
+        self.close()
+        self.open()
+        
     def next(self):
         self.open()
             

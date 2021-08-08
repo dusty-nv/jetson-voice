@@ -20,17 +20,22 @@ class AudioInputNode(Node):
         self.declare_parameter('device', '')          # input audio device ID or name
         self.declare_parameter('sample_rate', 16000)  # sample rate (in Hz)
         self.declare_parameter('chunk_size', 16000)   # number of samples per buffer
+        self.declare_parameter('resets', -1)          # number of times to reset the device (-1 is infinite)
         
         self.device_name = str(self.get_parameter('device').value)
         self.sample_rate = self.get_parameter('sample_rate').value
-        self.chunk_size  = self.get_parameter('chunk_size').value
+        self.chunk_size = self.get_parameter('chunk_size').value
+        self.resets = self.get_parameter('resets').value
+        
+        self.reset_count = 0
         
         if self.device_name == '':
             raise ValueError("must set the 'device' parameter to either an input audio device ID/name or the path to a .wav file")
         
-        self.get_logger().info(f'device = {self.device_name}')
-        self.get_logger().info(f'sample_rate = {self.sample_rate}')
-        self.get_logger().info(f'chunk_size = {self.chunk_size}')
+        self.get_logger().info(f'device={self.device_name}')
+        self.get_logger().info(f'sample_rate={self.sample_rate}')
+        self.get_logger().info(f'chunk_size={self.chunk_size}')
+        self.get_logger().info(f'resets={self.resets}')
         
         # check if this is an audio device or a wav file
         file_ext = os.path.splitext(self.device_name)[1].lower()
@@ -45,17 +50,29 @@ class AudioInputNode(Node):
         # create audio device
         self.device = AudioInput(wav=wav, mic=mic, sample_rate=self.sample_rate, chunk_size=self.chunk_size)
         self.device.open()
-        
+
         # create a timer to check for audio samples
         self.timer = self.create_timer(self.chunk_size / self.sample_rate * 0.75, self.publish_audio)
         
-    def publish_audio(self):
-        samples = self.device.next()
         
-        if samples is None:  # TODO implement audio device reset
+    def publish_audio(self):
+    
+        while True:
+            samples = self.device.next()
+            
+            if samples is not None:
+                break
+                
             self.get_logger().warning('no audio samples were returned from the audio device')
-            return
-
+            
+            if self.resets < 0 or self.reset_count < self.resets:
+                self.reset_count += 1
+                self.get_logger().warning(f'resetting audio device {self.device_name} (attempt {self.reset_count} of {self.resets})')
+                self.device.reset()
+            else:
+                self.get_logger().error(f'maximum audio device resets has been reached ({self.resets})')
+                return
+                
         if samples.dtype == np.float32:  # convert to int16 to make the message smaller
             samples = audio_to_int16(samples)
 

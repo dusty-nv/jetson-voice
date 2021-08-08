@@ -24,8 +24,8 @@ import argparse
 #
 _default_global_config = {
     'version' : 0.1,
-    'model_dir' : 'data/networks',
-    'model_manifest' : 'data/networks/manifest.json',
+    'model_dir' : '/jetson-voice/data/networks',
+    'model_manifest' : '/jetson-voice/data/networks/manifest.json',
     'default_backend' : 'tensorrt',
     'log_level' : 'info',
     'debug' : False,

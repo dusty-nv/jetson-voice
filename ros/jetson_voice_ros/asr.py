@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import rclpy
+import numpy as np
 
 from rclpy.node import Node
 from std_msgs.msg import String
@@ -36,7 +37,7 @@ class ASRNode(Node):
         samples = np.frombuffer(msg.data, dtype=msg.info.sample_format)
         self.get_logger().debug(f'recieved audio samples {samples.shape} dtype={samples.dtype}') # rms={np.sqrt(np.mean(samples**2))}')
         
-        results = asr(samples)
+        results = self.asr(samples)
         
         for transcript in results:
             msg = String()

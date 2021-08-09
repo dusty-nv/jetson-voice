@@ -40,10 +40,15 @@ class ASRNode(Node):
         results = self.asr(samples)
         
         for transcript in results:
+            text = transcript['text'].strip()
+            
+            if len(text) == 0:
+                continue
+                
             msg = String()
-            msg.data = transcript['text']
+            msg.data = text
 
-            self.get_logger().info(f"transcript:  {transcript['text']}")
+            self.get_logger().info(f"transcript:  {text}")
 
             if transcript['end']:
                 self.transcript_publisher.publish(msg)

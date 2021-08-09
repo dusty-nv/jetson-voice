@@ -47,9 +47,11 @@ RUN source ${ROS_ROOT}/install/setup.bash && \
 ################################################################
 ## project install
 ################################################################
-COPY jetson_voice jetson_voice
-COPY examples examples
-COPY scripts scripts
-COPY tests tests
+ARG WORKSPACE=/jetson-voice
+
+COPY jetson_voice ${WORKSPACE}/jetson_voice
+COPY examples ${WORKSPACE}/examples
+COPY scripts ${WORKSPACE}/scripts
+COPY tests ${WORKSPACE}/tests
 
 ENV PYTHONPATH="${WORKSPACE}:${PYTHONPATH}"

@@ -125,8 +125,12 @@ class AudioMicStream:
     def __init__(self, device, sample_rate, chunk_size):
         self.stream = None
         self.interface = pa.PyAudio()
+        
         self.device_info = find_audio_device(device, self.interface)
         self.device_id = self.device_info['index']
+        self.device_sample_rate = sample_rate
+        self.device_chunk_size = chunk_size
+        
         self.sample_rate = sample_rate
         self.chunk_size = chunk_size
         
@@ -140,14 +144,39 @@ class AudioMicStream:
     def open(self):
         if self.stream:
             return
+        
+        sample_rates = [self.sample_rate, int(self.device_info['defaultSampleRate']), 16000, 24000, 32000, 44100]
+        chunk_sizes = []
+        
+        for sample_rate in sample_rates:
+            chunk_sizes.append(int(self.chunk_size * sample_rate / self.sample_rate))
             
-        self.stream = self.interface.open(format=pa.paInt16,
-                        channels=1,
-                        rate=self.sample_rate,
-                        input=True,
-                        input_device_index=self.device_id,
-                        frames_per_buffer=self.chunk_size)
- 
+        for sample_rate, chunk_size in zip(sample_rates, chunk_sizes):
+            try:    
+                logging.info(f'trying to open audio input {self.device_id} with sample_rate={sample_rate} chunk_size={chunk_size}')
+                
+                self.stream = self.interface.open(format=pa.paInt16,
+                                channels=1,
+                                rate=sample_rate,
+                                input=True,
+                                input_device_index=self.device_id,
+                                frames_per_buffer=chunk_size)
+                                
+                self.device_sample_rate = sample_rate
+                self.device_chunk_size = chunk_size
+                
+                break
+                
+            except OSError as err:
+                print(err)
+                logging.warning(f'failed to open audio input {self.device_id} with sample_rate={sample_rate}')
+                self.stream = None
+                
+        if self.stream is None:
+            logging.error(f'failed to open audio input device {self.device_id} with any of these sample rates:')
+            logging.error(str(sample_rates))
+            raise ValueError(f"audio input device {self.device_id} couldn't be opened or does not support any of the above sample rates")
+                      
         print(f"\naudio stream opened on device {self.device_id} ({self.device_info['name']})")
         print("you can begin speaking now... (press Ctrl+C to exit)\n")
             
@@ -164,9 +193,16 @@ class AudioMicStream:
     def next(self):
         self.open()
             
-        samples = self.stream.read(self.chunk_size, exception_on_overflow=False)
+        samples = self.stream.read(self.device_chunk_size, exception_on_overflow=False)
         samples = np.frombuffer(samples, dtype=np.int16)
         
+        if self.sample_rate != self.device_sample_rate:
+            samples = audio_to_float(samples)
+            samples = librosa.resample(samples, self.device_sample_rate, self.sample_rate)
+            
+            if len(samples) != self.chunk_size:
+                logging.warning(f'resampled input audio has {len(samples)}, but expected {self.chunk_size} samples')
+                
         return samples
         
     def __next__(self):

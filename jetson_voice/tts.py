@@ -10,6 +10,7 @@ def TTS(resource, *args, **kwargs):
     See the TTSService class for the signature that implementations use.
     """
     factory_map = {
+        'jarvis' : 'jetson_voice.backends.jarvis.JarvisTTSService',
         'tensorrt' : 'jetson_voice.models.tts.TTSEngine',
         'onnxruntime' : 'jetson_voice.models.tts.TTSEngine'
     }

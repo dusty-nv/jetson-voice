@@ -72,5 +72,10 @@
    "jarvis_asr": {
       "type": "service",
       "backend": "jarvis"
+   },
+   
+   "jarvis_tts": {
+      "type": "service",
+      "backend": "jarvis"
    }
 }

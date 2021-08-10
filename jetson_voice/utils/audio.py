@@ -145,7 +145,7 @@ class AudioMicStream:
         if self.stream:
             return
         
-        sample_rates = [self.sample_rate, int(self.device_info['defaultSampleRate']), 16000, 24000, 32000, 44100]
+        sample_rates = [self.sample_rate, int(self.device_info['defaultSampleRate']), 16000, 22050, 32000, 44100]
         chunk_sizes = []
         
         for sample_rate in sample_rates:

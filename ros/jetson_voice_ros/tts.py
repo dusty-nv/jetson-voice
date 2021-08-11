@@ -26,7 +26,8 @@ class TTSNode(Node):
 
         # load the TTS model
         self.tts = TTS(self.model_name)
-
+        self.get_logger().info(f"model '{self.model_name}' ready")
+        
     def text_listener(self, msg):
         text = msg.data.strip()
         

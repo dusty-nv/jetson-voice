@@ -26,9 +26,10 @@ class ASRNode(Node):
 
         # load the ASR model
         self.asr = ASR(self.model_name)
+        self.get_logger().info(f"model '{self.model_name}' ready")
         
         if self.asr.classification:
-            raise ValueError(f'the ASR node does not support classification models')
+            raise ValueError(f'jetson_voice_ros/asr node does not support ASR classification models')
         
     def audio_listener(self, msg):
         if msg.info.sample_rate != self.asr.sample_rate:

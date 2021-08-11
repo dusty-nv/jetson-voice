@@ -30,9 +30,9 @@ class AudioOutputNode(Node):
         if self.device_name == '':
             raise ValueError("must set the 'device' parameter to either an input audio device ID/name or the path to a .wav file")
         
-        self.get_logger().info(f'device = {self.device_name}')
-        self.get_logger().info(f'sample_rate = {self.sample_rate}')
-        self.get_logger().info(f'chunk_size = {self.chunk_size}')
+        self.get_logger().info(f'device={self.device_name}')
+        self.get_logger().info(f'sample_rate={self.sample_rate}')
+        self.get_logger().info(f'chunk_size={self.chunk_size}')
         
         # check if this is an audio device or a wav file
         file_ext = os.path.splitext(self.device_name)[1].lower()

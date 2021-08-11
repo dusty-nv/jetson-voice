@@ -25,6 +25,8 @@ find_package(rosidl_default_generators REQUIRED)
 rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Audio.msg"
   "msg/AudioInfo.msg"
+  "msg/IntentSlot.msg"
+  "msg/Slot.msg"
   DEPENDENCIES std_msgs
 )
 

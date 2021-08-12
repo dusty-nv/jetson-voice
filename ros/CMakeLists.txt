@@ -26,6 +26,8 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/Audio.msg"
   "msg/AudioInfo.msg"
   "msg/IntentSlot.msg"
+  "msg/QuestionAnswerQuery.msg"
+  "msg/QuestionAnswerResult.msg"
   "msg/Slot.msg"
   DEPENDENCIES std_msgs
 )

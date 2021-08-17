@@ -28,8 +28,8 @@ Command used to pre-process the data:
 parser = argparse.ArgumentParser()
 
 parser.add_argument('--dataset', default='data/datasets/NLU-Evaluation-Data-master/nemo_format', type=str)
-#parser.add_argument('--dataset-version', default='v1.1', type=str)
 parser.add_argument('--config', default='data/config/training/intent_slot_classification_config.yaml', type=str)
+parser.add_argument('--exp-dir', default='data/nemo_experiments', type=str) 
 parser.add_argument('--model', default='distilbert-base-uncased', type=str) # "bert-base-uncased"
 parser.add_argument('--epochs', default=5, type=int)
 parser.add_argument('--samples', default=-1, type=int)
@@ -72,7 +72,11 @@ print(OmegaConf.to_yaml(config))
 # create trainer + model
 trainer = pl.Trainer(**config.trainer)
 model   = nemo_nlp.models.IntentSlotClassificationModel(config.model, trainer=trainer)
-exp_dir = str(exp_manager(trainer, config.get("exp_manager", None)))
+
+# set experiment directory
+exp_cfg = config.get('exp_manager', None)
+exp_cfg['exp_dir'] = args.exp_dir
+exp_dir = str(exp_manager(trainer, exp_cfg))
 
 print('experiment directory:', exp_dir)
 

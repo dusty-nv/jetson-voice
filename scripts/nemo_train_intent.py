@@ -27,9 +27,9 @@ Command used to pre-process the data:
 # parse args
 parser = argparse.ArgumentParser()
 
-parser.add_argument('--dataset', default='datasets/intent/NLU-Evaluation-Data-master', type=str)
-parser.add_argument('--dataset-version', default='v1.1', type=str)
-parser.add_argument('--config', default='config/intent_slot_classification_config.yaml', type=str)
+parser.add_argument('--dataset', default='data/datasets/NLU-Evaluation-Data-master/nemo_format', type=str)
+#parser.add_argument('--dataset-version', default='v1.1', type=str)
+parser.add_argument('--config', default='data/config/training/intent_slot_classification_config.yaml', type=str)
 parser.add_argument('--model', default='distilbert-base-uncased', type=str) # "bert-base-uncased"
 parser.add_argument('--epochs', default=5, type=int)
 parser.add_argument('--samples', default=-1, type=int)
@@ -45,7 +45,7 @@ config = OmegaConf.load(args.config)
 print(f'loaded config from {args.config}')
 
 # setup config
-config.model.data_dir = os.path.join(args.dataset, 'nemo_format')
+config.model.data_dir = args.dataset #os.path.join(args.dataset, 'nemo_format')
 
 config.model.language_model.max_seq_length = args.max_seq_length
 config.model.language_model.pretrained_model_name = args.model

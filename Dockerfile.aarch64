@@ -167,7 +167,6 @@ RUN pip3 show torch torchvision torchaudio torchtext
 # clone/build nemo
 ARG NEMO_VERSION
 RUN cd /opt && git clone --recursive --branch v${NEMO_VERSION} https://github.com/nvidia/nemo
-COPY patches/nemo/${NEMO_VERSION}/setup.py /opt/nemo/setup.py
 
 RUN pip3 install -r /opt/nemo/requirements/requirements.txt --verbose
 RUN pip3 install -r /opt/nemo/requirements/requirements_asr.txt --verbose
@@ -175,6 +174,7 @@ RUN pip3 install -r /opt/nemo/requirements/requirements_nlp.txt --verbose
 RUN pip3 install -r /opt/nemo/requirements/requirements_tts.txt --verbose
 #RUN pip3 install omegaconf==2.1.0dev24 --verbose
 
+COPY patches/nemo/${NEMO_VERSION}/setup.py /opt/nemo/setup.py
 RUN cd /opt/nemo && python3 setup.py install --verbose
 
 

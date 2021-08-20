@@ -118,7 +118,7 @@ try:
         SUPPORTED_PYTORCH_LIGHTNING = "pytorch-lightning==1.1.5"
     else:
         # Downgrade torch, pytorch-lightning
-        SUPPORTED_TORCH_VERSION = "torch<=1.7.1"
+        #SUPPORTED_TORCH_VERSION = "torch<=1.7.1"
         SUPPORTED_PYTORCH_LIGHTNING = "pytorch-lightning==1.1.5"
 
 except (ImportError, ModuleNotFoundError):

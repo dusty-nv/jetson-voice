@@ -6,33 +6,33 @@ import grpc
 import logging
 import numpy as np
 
-import jarvis_api.audio_pb2 as ja
-import jarvis_api.jarvis_tts_pb2 as jtts
-import jarvis_api.jarvis_tts_pb2_grpc as jtts_srv
+import riva_api.audio_pb2 as ra
+import riva_api.riva_tts_pb2 as rtts
+import riva_api.riva_tts_pb2_grpc as rtts_srv
 
 from jetson_voice import TTSService
 
     
-class JarvisTTSService(TTSService):
+class RivaTTSService(TTSService):
     """
-    Jarvis streaming TTS service.  
+    Riva streaming TTS service.  
     """
     def __init__(self, config, *args, **kwargs):
         """
-        Open a streaming channel to the Jarvis server for TTS.  This establishes a connection over GRPC 
+        Open a streaming channel to the Riva server for TTS.  This establishes a connection over GRPC 
         and sends/recieves the requests and responses.
         """
-        super(JarvisTTSService, self).__init__(config, *args, **kwargs)
+        super(RivaTTSService, self).__init__(config, *args, **kwargs)
         
         self.config.setdefault('server', 'localhost:50051')
         self.config.setdefault('sample_rate', 22050)        # ignored (will always be 22.05KHz)
         self.config.setdefault('voice_name', 'ljspeech')    # ignored
         self.config.setdefault('language_code', 'en-US')
 
-        logging.info(f'Jarvis TTS service config:\n{self.config}')
+        logging.info(f'Riva TTS service config:\n{self.config}')
         
         self.channel = grpc.insecure_channel(self.config.server)
-        self.client = jtts_srv.JarvisTTSStub(self.channel)
+        self.client = rtts_srv.RivaSpeechSynthesisStub(self.channel)
 
     def __call__(self, text):
         """
@@ -43,13 +43,13 @@ class JarvisTTSService(TTSService):
 
         Returns audio samples in a numpy array.
         """
-        req = jtts.SynthesizeSpeechRequest()
+        req = rtts.SynthesizeSpeechRequest()
         
         req.text = text
         req.language_code = self.config.language_code
         req.sample_rate_hz = self.config.sample_rate
         req.voice_name = self.config.voice_name
-        req.encoding = ja.AudioEncoding.LINEAR_PCM
+        req.encoding = ra.AudioEncoding.LINEAR_PCM
 
         resp = self.client.Synthesize(req)
         

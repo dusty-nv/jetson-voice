@@ -69,13 +69,13 @@
       "description": "TTS ensemble using FastPitch model for MEL spectorgram generation and a HiFiGAN model vocoder.  Female voice for speaking English."
    },
    
-   "jarvis_asr": {
+   "riva_asr": {
       "type": "service",
-      "backend": "jarvis"
+      "backend": "riva"
    },
    
-   "jarvis_tts": {
+   "riva_tts": {
       "type": "service",
-      "backend": "jarvis"
+      "backend": "riva"
    }
 }

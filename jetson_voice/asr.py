@@ -10,7 +10,7 @@ def ASR(resource, *args, **kwargs):
     See the ASRService class for the signature that implementations use.
     """
     factory_map = {
-        'jarvis' : 'jetson_voice.backends.jarvis.JarvisASRService',
+        'riva' : 'jetson_voice.backends.riva.RivaASRService',
         'tensorrt' : 'jetson_voice.models.asr.ASREngine',
         'onnxruntime' : 'jetson_voice.models.asr.ASREngine'
     }

@@ -174,6 +174,7 @@ $USER_VOLUME"
 if [ $ARCH = "aarch64" ]; then
 
 	sudo docker run --runtime nvidia -it --rm \
+        --security-opt  seccomp=unconfined \
 		--name=$CONTAINER_NAME \
 		--network host \
 		$MOUNTS $CONTAINER_IMAGE $USER_COMMAND

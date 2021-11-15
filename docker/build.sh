@@ -9,9 +9,9 @@ source docker/tag.sh
 
 if [ $ARCH = "aarch64" ]; then
 	if [ -z $BASE_IMAGE ]; then
-		if [ $L4T_VERSION = "32.5.1" ]; then
-			BASE_IMAGE="nvcr.io/nvidia/l4t-ml:r32.5.0-py3"
-		elif [ $L4T_VERSION = "32.5.0" ]; then
+		if [ $L4T_VERSION = "32.6.1" ]; then
+			BASE_IMAGE="nvcr.io/nvidia/l4t-ml:r32.6.1-py3"
+		elif [ $L4T_VERSION = "32.5.0" ] || [ $L4T_VERSION = "32.5.1" ]; then
 			BASE_IMAGE="nvcr.io/nvidia/l4t-ml:r32.5.0-py3"
 		elif [ $L4T_VERSION = "32.4.4" ]; then
 			BASE_IMAGE="nvcr.io/nvidia/l4t-ml:r32.4.4-py3"

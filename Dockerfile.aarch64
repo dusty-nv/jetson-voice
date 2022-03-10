@@ -47,6 +47,7 @@ RUN apt-get update && \
 		  libprotoc-dev \
 		  nano \
 		  tzdata \
+		  libssl-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
     
@@ -158,7 +159,7 @@ RUN apt-get update && \
     && apt-get clean
     
 RUN cd /opt && \
-    git clone --recursive --branch v0.8.1 https://github.com/pytorch/text torchtext && \
+    git clone --recursive --branch v0.11.1 https://github.com/pytorch/text torchtext && \
     cd torchtext && \
     python3 setup.py clean install 
     
@@ -167,7 +168,13 @@ RUN pip3 show torch torchvision torchaudio torchtext
 # clone/build nemo
 ARG NEMO_VERSION
 RUN cd /opt && git clone --recursive --branch v${NEMO_VERSION} https://github.com/nvidia/nemo
-COPY patches/nemo/${NEMO_VERSION}/setup.py /opt/nemo/setup.py
+
+# needed for nemo 1.0
+#COPY patches/nemo/${NEMO_VERSION}/setup.py /opt/nemo/setup.py
+
+# needed for nemo 1.6
+COPY patches/nemo/${NEMO_VERSION}/requirements.txt /opt/nemo/requirements/requirements.txt
+COPY patches/nemo/${NEMO_VERSION}/requirements_nlp.txt /opt/nemo/requirements/requirements_nlp.txt
 
 RUN pip3 install -r /opt/nemo/requirements/requirements.txt --verbose
 RUN pip3 install -r /opt/nemo/requirements/requirements_asr.txt --verbose
@@ -226,20 +233,20 @@ RUN pip3 install soundfile pyaudio wave
 ################################################################
 ## various patches to install
 ################################################################
-COPY patches patches
+#COPY patches patches
 
-RUN PYTHON_ROOT=`pip3 show torch | grep Location: | cut -d' ' -f2` && \
-    PYTORCH_VERSION=`pip3 show torch | grep Version: | cut -d' ' -f2` && \
-    TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
-    NEMO_PATH="$PYTHON_ROOT/nemo_toolkit-${NEMO_VERSION}-py3.6.egg/nemo" && \
-    echo "Python package root path:  $PYTHON_ROOT" && \
-    echo "Applying patches for PyTorch $PYTORCH_VERSION" && \
-    echo "Applying patches for transformers $TRANSFORMERS_VERSION" && \
-    cp patches/pytorch/$PYTORCH_VERSION/functional.py $PYTHON_ROOT/torch/functional.py && \
-    cp patches/transformers/$TRANSFORMERS_VERSION/convert_graph_to_onnx.py $PYTHON_ROOT/transformers/convert_graph_to_onnx.py && \
-    cp patches/transformers/$TRANSFORMERS_VERSION/modeling_distilbert.py $PYTHON_ROOT/transformers/models/distilbert/modeling_distilbert.py && \
-    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $NEMO_PATH/collections/nlp/modules/common/huggingface/distilbert.py && \
-    cp patches/nemo/${NEMO_VERSION}/exportable.py $NEMO_PATH/core/classes/exportable.py
+#RUN PYTHON_ROOT=`pip3 show torch | grep Location: | cut -d' ' -f2` && \
+#    PYTORCH_VERSION=`pip3 show torch | grep Version: | cut -d' ' -f2` && \
+#    TRANSFORMERS_VERSION=`pip3 show transformers | grep Version: | cut -d' ' -f2` && \
+#    NEMO_PATH="$PYTHON_ROOT/nemo_toolkit-${NEMO_VERSION}-py3.6.egg/nemo" && \
+#    echo "Python package root path:  $PYTHON_ROOT" && \
+#    echo "Applying patches for PyTorch $PYTORCH_VERSION" && \
+#    echo "Applying patches for transformers $TRANSFORMERS_VERSION" && \
+#    cp patches/pytorch/$PYTORCH_VERSION/functional.py $PYTHON_ROOT/torch/functional.py && \
+#    cp patches/transformers/$TRANSFORMERS_VERSION/convert_graph_to_onnx.py $PYTHON_ROOT/transformers/convert_graph_to_onnx.py && \
+#    cp patches/transformers/$TRANSFORMERS_VERSION/modeling_distilbert.py $PYTHON_ROOT/transformers/models/distilbert/modeling_distilbert.py && \
+#    cp patches/nemo/${NEMO_VERSION}/nlp/distilbert.py $NEMO_PATH/collections/nlp/modules/common/huggingface/distilbert.py && \
+#    cp patches/nemo/${NEMO_VERSION}/exportable.py $NEMO_PATH/core/classes/exportable.py
 
 
 # set Python to unicode

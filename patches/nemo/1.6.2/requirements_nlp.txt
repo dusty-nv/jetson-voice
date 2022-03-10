@@ -1,0 +1,15 @@
+boto3
+h5py
+matplotlib
+sentencepiece
+youtokentome>=1.0.5
+numpy
+gdown
+inflect
+sacremoses>=0.0.43
+nltk>=3.6.5
+fasttext
+opencc
+pangu
+jieba
+ftfy

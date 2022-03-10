@@ -19,11 +19,13 @@ The NLP models are using the [DistilBERT](https://arxiv.org/abs/1910.01108) tran
 
 ## Running the Container
 
-jetson-voice is distributed as a Docker container due to the number of dependencies.  There are pre-built containers images available on DockerHub for JetPack 4.4.1 and JetPack 4.5/4.5.1:
+jetson-voice is distributed as a Docker container due to the number of dependencies.  There are pre-built containers images available on DockerHub for JetPack 4.4.1 and newer:
 
 ```
 dustynv/jetson-voice:r32.4.4    # JetPack 4.4.1 (L4T R32.4.4)
 dustynv/jetson-voice:r32.5.0    # JetPack 4.5 (L4T R32.5.0) / JetPack 4.5.1 (L4T R32.5.1)
+dustynv/jetson-voice:r32.6.1    # JetPack 4.6 (L4T R32.6.1)
+dustynv/jetson-voice:r32.7.1    # JetPack 4.6.1 (L4T R32.7.1)
 ```
 
 To download and run the container, you can simply clone this repo and use the `docker/run.sh` script:

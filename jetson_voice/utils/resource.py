@@ -8,7 +8,7 @@ import tqdm
 import pprint
 import logging
 import tarfile
-import urllib
+import urllib.request
 import importlib
 
 from .config import global_config, ConfigDict

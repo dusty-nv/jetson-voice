@@ -89,7 +89,7 @@ is it going to be cloudy tomorrow.
 To test the ASR on a mic, first list the audio devices in your system to get the audio device ID's:
 
 ``` bash
-$ scripts/list_audio_devices.sh
+$ scripts/list_audio_devices.py
 
 ----------------------------------------------------
  Audio Input Devices
